@@ -1,8 +1,9 @@
-from model.DataSet import Trajectory, DataSet
+from models.DataSet import Trajectory, DataSet
 import pickle
 
+
 def loadMsnbc(minLength=None,maxLength=None,dump=True):
-    msnbc_path = '../data/msnbc/msnbc990928.seq'
+    msnbc_path = 'data/msnbc/msnbc990928.seq'
     with open(msnbc_path) as fp:
         lines = fp.readlines()
         line_num = len(lines)

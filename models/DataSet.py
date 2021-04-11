@@ -48,12 +48,15 @@ class Trajectory():
 
     def checkSubSeq(self,query):
         if KMP_algorithm(self.data,query) == -1:
-            return 0
-        return 1
+            return False
+        return True
 
     def randomFragment(self,fragment_length):
         index = np.random.randint(self.data_length-fragment_length)
         return self.data[index:index+fragment_length]
+
+    def spellData(self):
+        print(list(self.data))
 
 class DataSet():
     def __init__(self,location_num):
