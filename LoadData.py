@@ -23,7 +23,7 @@ def loadMsnbc(minLength=None,maxLength=None,dump=True):
         dataset.add_trajectory(traj)
 
     if dump is True:
-        with open('./data/msnbc.pickle', 'wb') as fp:
+        with open('data/msnbc.pickle', 'wb') as fp:
             pickle.dump(dataset,fp)
     
     return dataset
