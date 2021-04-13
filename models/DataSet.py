@@ -55,6 +55,9 @@ class Trajectory():
         index = np.random.randint(self.data_length-fragment_length)
         return self.data[index:index+fragment_length]
 
+    def allLocations(self):
+        return set(self.data)
+
     def spellData(self):
         print(list(self.data))
 
@@ -68,3 +71,6 @@ class DataSet():
     
     def get_trajectory(self,index):
         return self.record[index]
+
+    def get_traj_num(self):
+        return len(self.record)

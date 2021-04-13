@@ -1,7 +1,7 @@
 from LoadData import loadMsnbc
-from models.DataSet import DataSet, Trajectory
 from utils.Options import args_parser
 import pickle
+from models.GroundTruth import groundTruth
 
 
 if __name__ == '__main__':
@@ -11,5 +11,5 @@ if __name__ == '__main__':
             dataset = pickle.load(fp)
     else:
         dataset = loadMsnbc(dump=args.write_pickle,minLength=args.min_length,maxLength=args.max_length)
-    traj = dataset.get_trajectory(79)
-    print(traj.uploadOne())
+    fragments = groundTruth(dataset,args)
+    print(fragments)
