@@ -12,6 +12,9 @@ def loadMsnbc(minLength=None,maxLength=None,dump=True):
         line = lines[i]
         line_split = line.split()
         line_split = list(map(int, line_split))
+
+        for i in range(len(line_split)):
+            line_split[i] -= 1 # locations starts form 0
         
         if minLength is not None and len(line_split) < minLength:
             continue

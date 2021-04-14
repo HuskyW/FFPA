@@ -1,7 +1,7 @@
 from models.Candidate import generateCandidates
 from collections import defaultdict
 
-def groundTruth(dataset,args,verbose=True):
+def groundTruth(dataset,args):
     k = args.k
     l = args.l
     traj_num = dataset.get_traj_num()
@@ -18,13 +18,13 @@ def groundTruth(dataset,args,verbose=True):
     fragments = []
     for frag in fragments_orig:
         fragments.append([frag])
-    if verbose:
+    if args.verbose:
         print("1-fragments generated")
 
     # longer fragments
     for frag_len in range(2,l+1):
         candidates = generateCandidates(fragments)
-        if verbose:
+        if args.verbose:
             print("%d-fragments: %d candidates" % (frag_len,len(candidates)))
         if len(candidates) == 0:
             print('No candidate with length ' + frag_len)
@@ -36,12 +36,12 @@ def groundTruth(dataset,args,verbose=True):
                 if traj.checkSubSeq(candi) is True:
                     support_counts[candi] += 1
 
-            if traj_idx % 10000 == 0 and verbose:
+            if traj_idx % 10000 == 0 and args.verbose:
                 print("%d trajectories checked" % traj_idx)
             
         fragments = [key for key,value in support_counts.items() if value >= k]
 
-        if verbose:
+        if args.verbose:
             print("%d-fragments: %d admitted" % (frag_len,len(fragments)))
     
     return fragments
