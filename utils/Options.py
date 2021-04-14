@@ -16,6 +16,7 @@ def args_parser():
     parser.add_argument('--c_max', type=int, default=100, help="maximum candidates assigned to one client")
 
     # Settings
+    parser.add_argument('--dataset', type=str, default='msnbc', help="msnbc || zipf")
     parser.add_argument('--load_pickle', action='store_true', help='read dataset form pickle file')
     parser.add_argument('--write_pickle', action='store_true', help='store dataset into pickle file, do not work when --load_pickle is activated')
 

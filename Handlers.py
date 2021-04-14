@@ -26,22 +26,22 @@ class FastPubHandler(Handler):
         self.thres = [0] * self.args.l
 
 
-    def calculateEtaRoundOne(self):
+    def __calculateEtaRoundOne(self):
         epsilon = self.args.epsilon
         a = math.pow(math.e,epsilon)/(self.loc_num-1)
         return 1/(a+1)
 
-    def calculateEtaLonger(self,c_len):
+    def __calculateEtaLonger(self,c_len):
         epsilon = self.args.epsilon
         return 1/(1 + math.pow(math.e,(epsilon/c_len)))
 
-    def calculateThresRoundOne(self):
+    def __calculateThresRoundOne(self):
         p1 = (self.args.k/self.clients_num)*(1-self.eta[0])
         p2 = ((self.clients_num-self.args.k)/self.clients_num) * (self.eta[0]/(self.loc_num-1))
         p3 = math.sqrt(-math.log(self.args.xi)/(2*self.args.num_participants))
         return self.args.num_participants*(p1+p2+p3)
 
-    def calculateThresLonger(self,m): # m is times to be checked for each candidate
+    def __calculateThresLonger(self,m): # m is times to be checked for each candidate
         p1 = (self.args.k/self.clients_num)*(1-self.eta[self.round])
         p2 = ((self.clients_num-self.args.k)/self.clients_num) * self.eta[self.round]
         p3 = math.sqrt(-math.log(self.args.xi)/(2*m))
@@ -70,8 +70,8 @@ class FastPubHandler(Handler):
     def run(self):
         clients_num = self.dataset.get_traj_num()
         # publish 1-fragments
-        self.eta[0] = self.calculateEtaRoundOne()
-        self.thres[0] = self.calculateThresRoundOne()
+        self.eta[0] = self.__calculateEtaRoundOne()
+        self.thres[0] = self.__calculateThresRoundOne()
         print("eta: %f" % self.eta[0])
         print("thres: %f" % self.thres[0])
         participents = sampleClients(clients_num,self.args.num_participants)
@@ -97,7 +97,7 @@ class FastPubHandler(Handler):
                 return None
 
             c_len = min(self.args.c_max,len(candidates))
-            self.eta[fragment_len] = self.calculateEtaLonger(c_len)
+            self.eta[fragment_len] = self.__calculateEtaLonger(c_len)
 
             sampler = CandidateSampler(candidates)
 
@@ -107,7 +107,7 @@ class FastPubHandler(Handler):
             support_count = defaultdict(lambda : 0)
             for client_idx in participents: 
                 done += 1
-                if done % 10000 == 0 and self.args.verbose:
+                if done % 100000 == 0 and self.args.verbose:
                     print("%d trajectories checked" % done)
                 traj = self.dataset.get_trajectory(client_idx)
                 candis = sampler.sample(c_len)
@@ -117,7 +117,7 @@ class FastPubHandler(Handler):
 
             query_per_candi = self.args.num_participants * c_len /len(candidates)
             print(query_per_candi)
-            self.thres[fragment_len] = self.calculateThresLonger(query_per_candi)
+            self.thres[fragment_len] = self.__calculateThresLonger(query_per_candi)
 
             fragments = [key for key,value in support_count.items() if value >= self.thres[fragment_len]]
 
