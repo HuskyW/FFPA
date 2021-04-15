@@ -36,14 +36,14 @@ class FastPubHandler(Handler):
         return 1/(1 + math.pow(math.e,(epsilon/c_len)))
 
     def __calculateThresRoundOne(self):
-        p_loosyk = self.args.k/self.clients_num
+        p_softk = self.args.k/self.clients_num
         p1 = (self.args.k/self.clients_num)*(1-self.eta[0])
         p2 = ((self.clients_num-self.args.k)/self.clients_num) * (self.eta[0]/(self.loc_num-1))
         p3 = math.sqrt(-math.log(self.args.xi)/(2*self.args.num_participants))
 
-        p_loosyk = self.args.k/self.clients_num
-        if self.args.loosyk:
-            return self.args.num_participants*(p_loosyk+p3)
+        p_softk = self.args.k/self.clients_num
+        if self.args.softk:
+            return self.args.num_participants*(p_softk+p3)
 
         return self.args.num_participants*(p1+p2+p3)
 
@@ -51,15 +51,15 @@ class FastPubHandler(Handler):
         p1 = (self.args.k/self.clients_num)*(1-self.eta[self.round])
         p2 = ((self.clients_num-self.args.k)/self.clients_num) * self.eta[self.round]
         p3 = math.sqrt(-math.log(self.args.xi)/(2*m))
-        p_loosyk = self.args.k/self.clients_num
+        p_softk = self.args.k/self.clients_num
         
-        if self.args.loosyk is False:
+        if self.args.softk is False:
             return m*(p1+p2+p3)
 
         if self.round == self.args.l-1:
             return m*(p1+p2+p3)
 
-        return m*(p_loosyk+p3)     
+        return m*(p_softk+p3)     
 
     def __first_round(self,traj):
         real_result = traj.uploadOne()

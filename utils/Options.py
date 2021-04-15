@@ -12,7 +12,7 @@ def args_parser():
 
     # Advanced params
     parser.add_argument('--c_max', type=int, default=100, help="maximum candidates assigned to one client")
-    parser.add_argument('--loosyk', action='store_true', help='loosy k parameter thresholding')
+    parser.add_argument('--softk', action='store_true', help='loosy k parameter thresholding')
     parser.add_argument('--candidate_threshold', type=int, default=-1, help="Number of candidate in each round, -1: disable thresholding")
 
     # Settings
