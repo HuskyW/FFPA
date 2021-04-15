@@ -1,5 +1,6 @@
 import numpy as np
 from copy import deepcopy
+import random
 
 class CandidateSampler():
     def __init__(self,candidates):
@@ -15,6 +16,9 @@ class CandidateSampler():
             self.idx += num
             return res
         res = self.candidates[self.idx:len(self.candidates)]
+
+        random.shuffle(self.candidates)
+
         self.idx = self.idx + num - len(self.candidates)
         res.extend(self.candidates[0:self.idx])
         return res

@@ -9,7 +9,7 @@ def randomTraj(l,n_loc):
         res.append(np.random.randint(n_loc))
     return tuple(res)
 
-def generateZipf(n_traj=1000000,n_loc=10,n_traj_options=1000,l=10):
+def generateZipf(n_traj=10000000,n_loc=20,n_traj_options=2000,l=10):
     dataset = DataSet(n_loc)
 
     # generate candidates of possible traj

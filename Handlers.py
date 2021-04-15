@@ -36,16 +36,30 @@ class FastPubHandler(Handler):
         return 1/(1 + math.pow(math.e,(epsilon/c_len)))
 
     def __calculateThresRoundOne(self):
+        p_loosyk = self.args.k/self.clients_num
         p1 = (self.args.k/self.clients_num)*(1-self.eta[0])
         p2 = ((self.clients_num-self.args.k)/self.clients_num) * (self.eta[0]/(self.loc_num-1))
         p3 = math.sqrt(-math.log(self.args.xi)/(2*self.args.num_participants))
+
+        p_loosyk = self.args.k/self.clients_num
+        if self.args.loosyk:
+            return self.args.num_participants*(p_loosyk+p3)
+
         return self.args.num_participants*(p1+p2+p3)
 
     def __calculateThresLonger(self,m): # m is times to be checked for each candidate
         p1 = (self.args.k/self.clients_num)*(1-self.eta[self.round])
         p2 = ((self.clients_num-self.args.k)/self.clients_num) * self.eta[self.round]
         p3 = math.sqrt(-math.log(self.args.xi)/(2*m))
-        return m*(p1+p2+p3)
+        p_loosyk = self.args.k/self.clients_num
+        
+        if self.args.loosyk is False:
+            return m*(p1+p2+p3)
+
+        if self.round == self.args.l-1:
+            return m*(p1+p2+p3)
+
+        return m*(p_loosyk+p3)     
 
     def __first_round(self,traj):
         real_result = traj.uploadOne()
@@ -64,6 +78,16 @@ class FastPubHandler(Handler):
         for i in range(len(candidates)):
             final_response[candi_save[i]] = response[i]
         return final_response
+
+    def __filterCandidates(self,support_count):
+        exceed_k = [key for key,value in support_count.items() if value >= self.thres[self.round]]
+        if self.args.candidate_threshold < 0 or len(exceed_k) < self.args.candidate_threshold:
+            return exceed_k
+        sc_sorted = sorted(support_count.items(),key=lambda item:item[1],reverse=True)
+        res = []
+        for i in range(self.args.candidate_threshold):
+            res.append(sc_sorted[i][0])
+        return res
         
         
 
@@ -80,11 +104,8 @@ class FastPubHandler(Handler):
         for client_idx in participents:
             traj = self.dataset.get_trajectory(client_idx)
             res = self.__first_round(traj)
-            support_count[res] += 1
-        fragments_orig = [key for key,value in support_count.items() if value >= self.thres[0]]
-        fragments = []
-        for frag in fragments_orig:
-            fragments.append([frag])
+            support_count[(res,)] += 1
+        fragments = self.__filterCandidates(support_count)
 
         # publish longer fragments
         for fragment_len in range(1,self.args.l):
@@ -116,14 +137,14 @@ class FastPubHandler(Handler):
                     support_count[key] += value
 
             query_per_candi = self.args.num_participants * c_len /len(candidates)
-            print(query_per_candi)
+            print("Candidate avg chance: %.2f" % query_per_candi)
             self.thres[fragment_len] = self.__calculateThresLonger(query_per_candi)
 
-            fragments = [key for key,value in support_count.items() if value >= self.thres[fragment_len]]
+            fragments = self.__filterCandidates(support_count)
 
             if self.args.verbose:
-                print("eta: %f" % self.eta[fragment_len])
-                print("thres: %f" % self.thres[fragment_len])
+                print("eta: %.3f" % self.eta[fragment_len])
+                print("thres: %.2f" % self.thres[fragment_len])
             
             if self.args.verbose:
                 print("%d-fragments: %d admitted" % (fragment_len+1,len(fragments)))

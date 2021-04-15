@@ -35,7 +35,6 @@ if __name__ == '__main__':
         for frag in fragments:
             print(frag)
         if args.dataset == 'zipf':
-            args.k = 10000
             ground_truth = groundTruthFromConfig(config,args)
             tp = 0
             for frag in fragments:
