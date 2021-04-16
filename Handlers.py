@@ -1,3 +1,6 @@
+'''
+    Handler of FastPub, an FastPubHandler instance an do all works of trajectory publication given the dataset
+'''
 import abc
 from utils.Randomize import *
 import math
@@ -5,8 +8,8 @@ import numpy as np
 from collections import defaultdict
 from models.Candidate import generateCandidates
 from utils.Sampling import CandidateSampler, sampleClients
+from utils.Print import printRound
 import multiprocess
-
 
 
 class Handler(metaclass=abc.ABCMeta):
@@ -86,7 +89,7 @@ class FastPubHandler(Handler):
         local_support_count = defaultdict(lambda : 0)
         sampler = CandidateSampler(candidates)
         for idx in range(len(participents)):
-            if idx > 0 and idx % milestone == 0:
+            if idx > 0 and idx % milestone == 0 and self.args.verbose:
                 print("Worker %2d: %d%% done" % (process_idx,int(round(idx*100/len(participents)))))
             
             client_idx = participents[idx]
@@ -98,7 +101,8 @@ class FastPubHandler(Handler):
                 local_support_count[key] += value
 
         queue.put(local_support_count)
-        print("Worker %2d: all done" % process_idx)
+        if self.args.verbose:
+            print("Worker %2d: all done" % process_idx)
         return
 
 
@@ -117,6 +121,7 @@ class FastPubHandler(Handler):
     def run(self):
         clients_num = self.dataset.get_traj_num()
         # publish 1-fragments
+        printRound(1)
         self.eta[0] = self.__calculateEtaRoundOne()
         self.thres[0] = self.__calculateThresRoundOne()
         print("eta: %f" % self.eta[0])
@@ -132,10 +137,10 @@ class FastPubHandler(Handler):
 
         # publish longer fragments
         for fragment_len in range(1,self.args.l):
+            printRound(fragment_len+1)
             self.round += 1
             candidates = generateCandidates(fragments)
-            if self.args.verbose:
-                print("%d-fragments: %d candidates" % (fragment_len+1,len(candidates)))
+            print("%d-fragments: %d candidates" % (fragment_len+1,len(candidates)))
             if len(candidates) == 0:
                 print('No candidate with length ' + str(fragment_len+1))
                 return None
@@ -177,7 +182,8 @@ class FastPubHandler(Handler):
                 for p in jobs:
                     p.join()
                 
-                print("Aggregating...")
+                if self.args.verbose:
+                    print("Aggregating...")
 
                 results = [queue.get() for j in jobs]
 
@@ -195,12 +201,10 @@ class FastPubHandler(Handler):
 
             fragments = self.__filterCandidates(support_count)
 
-            if self.args.verbose:
-                print("eta: %.3f" % self.eta[fragment_len])
-                print("thres: %.2f" % self.thres[fragment_len])
-            
-            if self.args.verbose:
-                print("%d-fragments: %d admitted" % (fragment_len+1,len(fragments)))
+
+            print("eta: %.3f" % self.eta[fragment_len])
+            print("thres: %.2f" % self.thres[fragment_len])
+            print("%d-fragments: %d admitted" % (fragment_len+1,len(fragments)))
         return fragments
                 
                 
