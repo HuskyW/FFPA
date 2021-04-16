@@ -3,6 +3,25 @@ from collections import defaultdict
 from models.DataSet import DataSet,Trajectory
 from utils.Naming import GroundTruthPickleName
 import pickle
+import multiprocess
+import math
+
+def ground_truth_worker(dataset,process_idx,candidates,participents,queue):
+    num_milestone = 5
+    milestone = math.floor(len(participents)/num_milestone)
+    local_support_count = defaultdict(lambda : 0)
+    for idx in range(len(participents)):
+        if idx > 0 and idx % milestone == 0:
+            print("Worker %2d: %d%% done" % (process_idx,int(round(idx*100/len(participents)))))
+        client_idx = participents[idx]
+        traj = dataset.get_trajectory(client_idx)
+        for candi in candidates:
+            if traj.checkSubSeq(candi) is True:
+                local_support_count[candi] += 1
+
+    queue.put(local_support_count)
+    print("Worker %2d: all done" % process_idx)
+    return
 
 def groundTruth(dataset,args):
     k = args.k
@@ -10,14 +29,14 @@ def groundTruth(dataset,args):
     traj_num = dataset.get_traj_num()
     
     # 1-fragments
-    support_counts = defaultdict(lambda : 0)
+    support_count = defaultdict(lambda : 0)
     for traj_idx in range(traj_num):
         traj = dataset.get_trajectory(traj_idx)
         locations = traj.allLocations()
         for loc in locations:
-            support_counts[loc] += 1
+            support_count[loc] += 1
     # filter out
-    fragments_orig = [key for key,value in support_counts.items() if value >= k]
+    fragments_orig = [key for key,value in support_count.items() if value >= k]
     fragments = []
     for frag in fragments_orig:
         fragments.append([frag])
@@ -32,27 +51,53 @@ def groundTruth(dataset,args):
         if len(candidates) == 0:
             print('No candidate with length ' + frag_len)
             return None
-        support_counts = defaultdict(lambda : 0)
-        for traj_idx in range(traj_num):
-            traj = dataset.get_trajectory(traj_idx)
-            for candi in candidates:
-                if traj.checkSubSeq(candi) is True:
-                    support_counts[candi] += 1
+        support_count = defaultdict(lambda : 0)
+        if args.process <= 0:
+            for traj_idx in range(traj_num):
+                traj = dataset.get_trajectory(traj_idx)
+                for candi in candidates:
+                    if traj.checkSubSeq(candi) is True:
+                        support_count[candi] += 1
 
-            if traj_idx % 10000 == 0 and args.verbose:
-                print("%d trajectories checked" % traj_idx)
+                if traj_idx % 10000 == 0 and args.verbose:
+                    print("%d trajectories checked" % traj_idx)
+        else:
+            mananger = multiprocess.Manager()
+            queue = mananger.Queue()
+            jobs = []
+            workload = math.floor(traj_num/args.process)
+            for proc_idx in range(args.process):
+                if proc_idx == args.process - 1:
+                    participents_load = list(range(proc_idx*workload,traj_num))
+                else:
+                    participents_load = list(range(proc_idx*workload,(proc_idx+1)*workload))
+                p = multiprocess.Process(target=ground_truth_worker,args=(dataset,proc_idx,candidates,participents_load,queue))
+                jobs.append(p)
+                p.start()
+
+            for p in jobs:
+                p.join()
             
-        fragments = [key for key,value in support_counts.items() if value >= k]
+            print("Aggregating...")
+
+            results = [queue.get() for j in jobs]
+
+            for res in results:
+                for key,value in res.items():
+                    support_count[key] += value
+
+            
+        fragments = [key for key,value in support_count.items() if value >= k]
 
         if args.verbose:
             print("%d-fragments: %d admitted" % (frag_len,len(fragments)))
 
 
-    fragments = [key for key,value in support_counts.items() if value >= k]
+    fragments = [key for key,value in support_count.items() if value >= k]
     pickleName = GroundTruthPickleName(args)
     with open(pickleName,'wb') as fp:
         pickle.dump(fragments,fp)
-    results = [(key,value) for key,value in support_counts.items() if value >= k]
+    results = [(key,value) for key,value in support_count.items() if value >= k]
     results = sorted(results,key=lambda item:item[1],reverse=True)
     for frag in results:
         print('%s: %d' % (str(frag[0]),frag[1]))
@@ -77,14 +122,14 @@ def groundTruthFromConfig(config,args):
     traj_num = dataset.get_traj_num()
     
     # 1-fragments
-    support_counts = defaultdict(lambda : 0)
+    support_count = defaultdict(lambda : 0)
     for traj_idx in range(traj_num):
         traj = dataset.get_trajectory(traj_idx)
         locations = traj.allLocations()
         for loc in locations:
-            support_counts[loc] += support_count_weight[traj_idx]
+            support_count[loc] += support_count_weight[traj_idx]
     # filter out
-    fragments_orig = [key for key,value in support_counts.items() if value >= k]
+    fragments_orig = [key for key,value in support_count.items() if value >= k]
     fragments = []
     for frag in fragments_orig:
         fragments.append([frag])
@@ -99,17 +144,17 @@ def groundTruthFromConfig(config,args):
         if len(candidates) == 0:
             print('No candidate with length ' + frag_len)
             return None
-        support_counts = defaultdict(lambda : 0)
+        support_count = defaultdict(lambda : 0)
         for traj_idx in range(traj_num):
             traj = dataset.get_trajectory(traj_idx)
             for candi in candidates:
                 if traj.checkSubSeq(candi) is True:
-                    support_counts[candi] += support_count_weight[traj_idx]
+                    support_count[candi] += support_count_weight[traj_idx]
 
             if traj_idx % 10000 == 0 and args.verbose:
                 print("%d trajectories checked" % traj_idx)
             
-        fragments = [key for key,value in support_counts.items() if value >= k]
+        fragments = [key for key,value in support_count.items() if value >= k]
 
         if args.verbose:
             print("%d-fragments: %d admitted" % (frag_len,len(fragments)))

@@ -87,7 +87,7 @@ class FastPubHandler(Handler):
         sampler = CandidateSampler(candidates)
         for idx in range(len(participents)):
             if idx > 0 and idx % milestone == 0:
-                print("Worker %2d: %d%% done" % (process_idx,math.floor(idx*100/len(participents))))
+                print("Worker %2d: %d%% done" % (process_idx,int(round(idx*100/len(participents)))))
             
             client_idx = participents[idx]
             traj = self.dataset.get_trajectory(client_idx)
@@ -161,7 +161,8 @@ class FastPubHandler(Handler):
                     for key,value in res.items():
                         support_count[key] += value
             else:
-                queue = multiprocess.Queue()
+                mananger = multiprocess.Manager()
+                queue = mananger.Queue()
                 jobs = []
                 workload = math.floor(len(participents)/self.args.process)
                 for proc_idx in range(self.args.process):
