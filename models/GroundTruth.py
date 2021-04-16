@@ -1,6 +1,8 @@
 from models.Candidate import generateCandidates
 from collections import defaultdict
 from models.DataSet import DataSet,Trajectory
+from utils.Naming import GroundTruthPickleName
+import pickle
 
 def groundTruth(dataset,args):
     k = args.k
@@ -44,7 +46,17 @@ def groundTruth(dataset,args):
 
         if args.verbose:
             print("%d-fragments: %d admitted" % (frag_len,len(fragments)))
-    
+
+
+    fragments = [key for key,value in support_counts.items() if value >= k]
+    pickleName = GroundTruthPickleName(args)
+    with open(pickleName,'wb') as fp:
+        pickle.dump(fragments,fp)
+    results = [(key,value) for key,value in support_counts.items() if value >= k]
+    results = sorted(results,key=lambda item:item[1],reverse=True)
+    for frag in results:
+        print('%s: %d' % (str(frag[0]),frag[1]))
+
     return fragments
 
 def groundTruthFromConfig(config,args):

@@ -3,6 +3,18 @@ from utils.Options import args_parser
 import pickle
 from models.GroundTruth import groundTruth, groundTruthFromConfig
 from Handlers import FastPubHandler
+from utils.Naming import GroundTruthPickleName
+
+
+def ckeckWithGroundTruth(result,truth):
+    tp = 0
+    for frag in result:
+        if frag in truth:
+            tp += 1
+    precision = tp/len(result)
+    recall = tp/len(truth)
+    print("Precision: %.2f; Recall: %.2f" % (precision,recall))
+    return
 
 
 if __name__ == '__main__':
@@ -34,12 +46,13 @@ if __name__ == '__main__':
         fragments = handler.run()
         for frag in fragments:
             print(frag)
-        if args.dataset == 'zipf':
-            ground_truth = groundTruthFromConfig(config,args)
-            tp = 0
-            for frag in fragments:
-                if frag in ground_truth:
-                    tp += 1
-            precision = tp/len(fragments)
-            recall = tp/len(ground_truth)
-            print("Precision: %.2f; Recall: %.2f" % (precision,recall))
+
+
+    if args.dataset == 'zipf':
+        ground_truth = groundTruthFromConfig(config,args)
+    elif args.dataset == 'msnbc':
+        pickleName = GroundTruthPickleName(args)
+        with open(pickleName,'rb') as fp:
+            ground_truth = pickle.load(fp)
+    ckeckWithGroundTruth(fragments,ground_truth)
+

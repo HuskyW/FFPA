@@ -81,11 +81,11 @@ class FastPubHandler(Handler):
 
     def __filterCandidates(self,support_count):
         exceed_k = [key for key,value in support_count.items() if value >= self.thres[self.round]]
-        if self.args.candidate_threshold < 0 or len(exceed_k) < self.args.candidate_threshold:
+        if self.args.admit_threshold < 0 or len(exceed_k) < self.args.admit_threshold:
             return exceed_k
         sc_sorted = sorted(support_count.items(),key=lambda item:item[1],reverse=True)
         res = []
-        for i in range(self.args.candidate_threshold):
+        for i in range(self.args.admit_threshold):
             res.append(sc_sorted[i][0])
         return res
         
