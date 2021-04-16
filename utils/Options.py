@@ -25,6 +25,8 @@ def args_parser():
     parser.add_argument('--max_length', type=int, default=None, help="maximal length of each trajectory")
     parser.add_argument('--verbose', action='store_true', help='verbose print')
 
+    parser.add_argument('--process', type=int, default=0, help="number of worker processes, 0: single process")
+
 
     args = parser.parse_args()
     return args

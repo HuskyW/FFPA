@@ -5,7 +5,7 @@ import numpy as np
 from collections import defaultdict
 from models.Candidate import generateCandidates
 from utils.Sampling import CandidateSampler, sampleClients
-
+import multiprocess
 
 
 
@@ -24,6 +24,7 @@ class FastPubHandler(Handler):
         self.round = 0
         self.eta = [0] * self.args.l
         self.thres = [0] * self.args.l
+        self.c_len = [0] * self.args.l
 
 
     def __calculateEtaRoundOne(self):
@@ -31,9 +32,9 @@ class FastPubHandler(Handler):
         a = math.pow(math.e,epsilon)/(self.loc_num-1)
         return 1/(a+1)
 
-    def __calculateEtaLonger(self,c_len):
+    def __calculateEtaLonger(self):
         epsilon = self.args.epsilon
-        return 1/(1 + math.pow(math.e,(epsilon/c_len)))
+        return 1/(1 + math.pow(math.e,(epsilon/self.c_len[self.round])))
 
     def __calculateThresRoundOne(self):
         p_softk = self.args.k/self.clients_num
@@ -66,7 +67,7 @@ class FastPubHandler(Handler):
         noisy_result = randomInt(real_result,self.eta[0],self.loc_num)
         return noisy_result
     
-    def __later_round(self,traj,candidates):
+    def later_round(self,traj,candidates):
         candi_len = len(candidates)
         candi_save = list(candidates)
         response = [0] * candi_len
@@ -78,6 +79,28 @@ class FastPubHandler(Handler):
         for i in range(len(candidates)):
             final_response[candi_save[i]] = response[i]
         return final_response
+    
+    def later_round_worker(self,process_idx,candidates,participents,queue):
+        num_milestone = 5
+        milestone = math.floor(len(participents)/num_milestone)
+        local_support_count = defaultdict(lambda : 0)
+        sampler = CandidateSampler(candidates)
+        for idx in range(len(participents)):
+            if idx > 0 and idx % milestone == 0:
+                print("Worker %2d: %d%% done" % (process_idx,math.floor(idx*100/len(participents))))
+            
+            client_idx = participents[idx]
+            traj = self.dataset.get_trajectory(client_idx)
+            candis = sampler.sample(self.c_len[self.round])
+            res = self.later_round(traj,candis)
+
+            for key,value in res.items():
+                local_support_count[key] += value
+
+        queue.put(local_support_count)
+        print("Worker %2d: all done" % process_idx)
+        return
+
 
     def __filterCandidates(self,support_count):
         exceed_k = [key for key,value in support_count.items() if value >= self.thres[self.round]]
@@ -117,26 +140,55 @@ class FastPubHandler(Handler):
                 print('No candidate with length ' + str(fragment_len+1))
                 return None
 
-            c_len = min(self.args.c_max,len(candidates))
-            self.eta[fragment_len] = self.__calculateEtaLonger(c_len)
+            self.c_len[self.round] = min(self.args.c_max,len(candidates))
+            self.eta[fragment_len] = self.__calculateEtaLonger()
 
             sampler = CandidateSampler(candidates)
 
             participents = sampleClients(clients_num,self.args.num_participants)
 
-            done = 0
             support_count = defaultdict(lambda : 0)
-            for client_idx in participents: 
-                done += 1
-                if done % 100000 == 0 and self.args.verbose:
-                    print("%d trajectories checked" % done)
-                traj = self.dataset.get_trajectory(client_idx)
-                candis = sampler.sample(c_len)
-                res = self.__later_round(traj,candis)
-                for key,value in res.items():
-                    support_count[key] += value
+            
+                
+            if self.args.process <= 0:
+                for idx in range(len(participents)):
+                    if idx % 100000 == 0 and idx > 0 and self.args.verbose:
+                        print("%d trajectories checked" % idx)
+                    client_idx = participents[idx]
+                    traj = self.dataset.get_trajectory(client_idx)
+                    candis = sampler.sample(self.c_len[self.round])
+                    res = self.later_round(traj,candis)
+                    for key,value in res.items():
+                        support_count[key] += value
+            else:
+                queue = multiprocess.Queue()
+                jobs = []
+                workload = math.floor(len(participents)/self.args.process)
+                for proc_idx in range(self.args.process):
+                    if proc_idx == self.args.process - 1:
+                        participents_load = participents[proc_idx*workload:len(participents)]
+                    else:
+                        participents_load = participents[proc_idx*workload:(proc_idx+1)*workload]
+                    p = multiprocess.Process(target=self.later_round_worker,args=(proc_idx,candidates,participents_load,queue))
+                    jobs.append(p)
+                    p.start()
 
-            query_per_candi = self.args.num_participants * c_len /len(candidates)
+                for p in jobs:
+                    p.join()
+                
+                print("Aggregating...")
+
+                results = [queue.get() for j in jobs]
+
+                for res in results:
+                    for key,value in res.items():
+                        support_count[key] += value
+
+
+
+                
+
+            query_per_candi = self.args.num_participants * self.c_len[self.round] /len(candidates)
             print("Candidate avg chance: %.2f" % query_per_candi)
             self.thres[fragment_len] = self.__calculateThresLonger(query_per_candi)
 
