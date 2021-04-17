@@ -48,8 +48,9 @@ if __name__ == '__main__':
         elif args.mode == 'triehh':
             handler = TriehhHandler(args,dataset)
         fragments = handler.run()
-        for frag in fragments:
-            print(frag)
+        if args.verbose:
+            for frag in fragments:
+                print(frag)
 
 
     if args.dataset == 'zipf':

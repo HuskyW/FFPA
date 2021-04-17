@@ -23,13 +23,10 @@ class CandidateSampler():
         res.extend(self.candidates[0:self.idx])
         return res
 
-def sampleClients(n_client,m):
-    res = []
-    clients = list(range(n_client))
-    m_left = m
-    while m_left > n_client:
-        res.extend(deepcopy(clients))
-        m_left -= n_client
+def sampleClients(args,orig_traj_num,m):
+    clients = []
+    for i in range(args.duplicate):
+        clients.extend(list(range(orig_traj_num)))
 
-    res.extend(np.random.choice(clients,m_left,replace=False))
+    res = np.random.choice(clients,m,replace=False)
     return res

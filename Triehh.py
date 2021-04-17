@@ -82,6 +82,9 @@ class TriehhHandler(Handler):
         self.args = args
         self.dataset = dataset
         self.tree = Tree()
+        self.orig_traj_num = self.dataset.get_traj_num()
+        self.client_num = self.orig_traj_num * self.args.duplicate
+        self.threshold = self.args.num_participants * self.args.k / self.client_num
 
     def clientVote(self,traj,curr_round):
         if traj.data_length < curr_round:
@@ -104,10 +107,9 @@ class TriehhHandler(Handler):
 
 
     def run(self):
-        clients_num = self.dataset.get_traj_num()
         for round_idx in range(1,self.args.round_threshold+1):
             printRound(round_idx)
-            participents = sampleClients(clients_num,self.args.num_participants)
+            participents = sampleClients(self.args,self.orig_traj_num,self.args.num_participants)
             support_count = defaultdict(lambda : 0)
             if self.args.process <= 0:
                 for idx in range(len(participents)):
@@ -123,7 +125,7 @@ class TriehhHandler(Handler):
             
             update = 0
             for key, value in support_count.items():
-                if value >= self.args.k * self.args.duplicate:
+                if value >= self.threshold:
                     update += 1
                     self.tree.addLeaf(key[0],key[1])
             

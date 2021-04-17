@@ -26,7 +26,7 @@ def ground_truth_worker(dataset,process_idx,candidates,participents,queue,verbos
     return
 
 def groundTruth(dataset,args):
-    k = args.k
+    k = int(args.k/args.duplicate)
     l = args.l
     traj_num = dataset.get_traj_num()
     

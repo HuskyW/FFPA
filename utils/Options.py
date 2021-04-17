@@ -4,7 +4,7 @@ def args_parser():
     parser = argparse.ArgumentParser()
     # Basic params
     parser.add_argument('--l', type=int, default=3, help="target fragment length")
-    parser.add_argument('--k', type=int, default=50, help="threshold of k-anonymity WRT THE ORIGINAL (NOT DUPLICATED) DATASET")
+    parser.add_argument('--k', type=int, default=50, help="param of k-anonymity")
     parser.add_argument('--xi', type=float, default=0.1, help="allowed error rate for k-anonymity")
     parser.add_argument('--epsilon', type=float, default=10.0, help="param of LDP")
     parser.add_argument('--num_participants', type=int, default=300000, help="number of participating clients")

@@ -22,7 +22,8 @@ class FastPubHandler(Handler):
     def __init__(self,args,dataset):
         self.args = args
         self.dataset = dataset
-        self.clients_num = self.dataset.get_traj_num()
+        self.orig_traj_num = self.dataset.get_traj_num()
+        self.clients_num = self.dataset.get_traj_num() * self.args.duplicate
         self.loc_num = self.dataset.location_num
         self.round = 0
         self.eta = [0] * self.args.l
@@ -120,14 +121,14 @@ class FastPubHandler(Handler):
         
 
     def run(self):
-        clients_num = self.dataset.get_traj_num()
+
         # publish 1-fragments
         printRound(1)
         self.eta[0] = self.__calculateEtaRoundOne()
         self.thres[0] = self.__calculateThresRoundOne()
         print("eta: %f" % self.eta[0])
         print("thres: %f" % self.thres[0])
-        participents = sampleClients(clients_num,self.args.num_participants)
+        participents = sampleClients(self.args,self.orig_traj_num,self.args.num_participants)
 
         support_count = defaultdict(lambda : 0)
         for client_idx in participents:
@@ -151,7 +152,7 @@ class FastPubHandler(Handler):
 
             sampler = CandidateSampler(candidates)
 
-            participents = sampleClients(clients_num,self.args.num_participants)
+            participents = sampleClients(self.args,self.orig_traj_num,self.args.num_participants)
 
             support_count = defaultdict(lambda : 0)
             
