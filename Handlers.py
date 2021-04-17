@@ -40,6 +40,7 @@ class FastPubHandler(Handler):
         return 1/(1 + math.pow(math.e,(epsilon/self.c_len[self.round])))
 
     def __calculateThresRoundOne(self):
+        # Notice that duplicate can be ignored here because it vanish after deviding with k
         p_softk = self.args.k/self.clients_num
         p1 = (self.args.k/self.clients_num)*(1-self.eta[0])
         p2 = ((self.clients_num-self.args.k)/self.clients_num) * (self.eta[0]/(self.loc_num-1))
@@ -51,7 +52,7 @@ class FastPubHandler(Handler):
 
         return self.args.num_participants*(p1+p2+p3)
 
-    def __calculateThresLonger(self,m): # m is times to be checked for each candidate
+    def __calculateThresLonger(self,m): # m is times checked by clients for each candidate
         p1 = (self.args.k/self.clients_num)*(1-self.eta[self.round])
         p2 = ((self.clients_num-self.args.k)/self.clients_num) * self.eta[self.round]
         p3 = math.sqrt(-math.log(self.args.xi)/(2*m))

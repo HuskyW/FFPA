@@ -3,6 +3,7 @@ from utils.Options import args_parser
 import pickle
 from models.GroundTruth import groundTruth, groundTruthFromConfig
 from Handlers import FastPubHandler
+from Triehh import TriehhHandler
 from utils.Naming import GroundTruthPickleName
 
 
@@ -41,8 +42,11 @@ if __name__ == '__main__':
         else:
             fragments = groundTruth(dataset,args)
             print(fragments)
-    elif args.mode == 'fastpub':
-        handler = FastPubHandler(args,dataset)
+    else:  
+        if args.mode == 'fastpub':
+            handler = FastPubHandler(args,dataset)
+        elif args.mode == 'triehh':
+            handler = TriehhHandler(args,dataset)
         fragments = handler.run()
         for frag in fragments:
             print(frag)
