@@ -107,6 +107,25 @@ def groundTruth(dataset,args):
 
     return fragments
 
+
+def config_ground_truth_worker(dataset,process_idx,candidates,participents,weights,queue,verbose):
+    num_milestone = 5
+    milestone = math.floor(len(participents)/num_milestone)
+    local_support_count = defaultdict(lambda : 0)
+    for idx in range(len(participents)):
+        if idx > 0 and idx % milestone == 0 and verbose:
+            print("Worker %2d: %d%% done" % (process_idx,int(round(idx*100/len(participents)))))
+        client_idx = participents[idx]
+        traj = dataset.get_trajectory(client_idx)
+        for candi in candidates:
+            if traj.checkSubSeq(candi) is True:
+                local_support_count[candi] += weights[client_idx]
+
+    queue.put(local_support_count)
+    if verbose:
+        print("Worker %2d: all done" % process_idx)
+    return
+
 def groundTruthFromConfig(config,args):
     metadata = config[1]
     record = config[0]
@@ -120,7 +139,7 @@ def groundTruthFromConfig(config,args):
         dataset.add_trajectory(traj)
         support_count_weight.append(value)
     
-    k = args.k
+    k = int(args.k / args.duplicate)
     l = args.l
     traj_num = dataset.get_traj_num()
     
@@ -148,11 +167,38 @@ def groundTruthFromConfig(config,args):
             print('No candidate with length ' + frag_len)
             return None
         support_count = defaultdict(lambda : 0)
-        for traj_idx in range(traj_num):
-            traj = dataset.get_trajectory(traj_idx)
-            for candi in candidates:
-                if traj.checkSubSeq(candi) is True:
-                    support_count[candi] += support_count_weight[traj_idx]
+        if args.process <= 0:
+            for traj_idx in range(traj_num):
+                traj = dataset.get_trajectory(traj_idx)
+                for candi in candidates:
+                    if traj.checkSubSeq(candi) is True:
+                        support_count[candi] += support_count_weight[traj_idx]
+        else:
+            mananger = multiprocess.Manager()
+            queue = mananger.Queue()
+            jobs = []
+            workload = math.floor(traj_num/args.process)
+            for proc_idx in range(args.process):
+                if proc_idx == args.process - 1:
+                    participents_load = list(range(proc_idx*workload,traj_num))
+                else:
+                    participents_load = list(range(proc_idx*workload,(proc_idx+1)*workload))
+                p = multiprocess.Process(target=config_ground_truth_worker,args=(dataset,proc_idx,candidates,participents_load,support_count_weight,queue,args.verbose))
+                jobs.append(p)
+                p.start()
+
+            for p in jobs:
+                p.join()
+            
+            if args.verbose:
+                print("Aggregating...")
+
+            results = [queue.get() for j in jobs]
+
+            for res in results:
+                for key,value in res.items():
+                    support_count[key] += value
+
 
             if traj_idx % 10000 == 0 and args.verbose:
                 print("%d trajectories checked" % traj_idx)
