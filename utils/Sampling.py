@@ -27,6 +27,8 @@ def sampleClients(args,orig_traj_num,m):
     clients = []
     for i in range(args.duplicate):
         clients.extend(list(range(orig_traj_num)))
-
-    res = np.random.choice(clients,m,replace=False)
+    if m <= len(clients):
+        res = np.random.choice(clients,m,replace=False)
+    else:
+        res = np.random.choice(clients,m,replace=True)
     return res
