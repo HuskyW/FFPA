@@ -3,6 +3,7 @@ from utils.Sampling import sampleClients
 from utils.Print import printRound
 import multiprocess
 from collections import defaultdict
+import multiprocess
 
 class Node():
     def __init__(self,parent,data,uid):
@@ -105,6 +106,19 @@ class TriehhHandler(Handler):
                 res.add(piece)
         return list(res)
 
+    def __worker(self,proc_idx,curr_round,participents,queue):
+        local_support_count = defaultdict(lambda : 0)
+        for i in range(len(participents)):
+            client_idx = participents[i]
+            res = self.clientVote(self.dataset.get_trajectory(client_idx),curr_round)
+            if res is not None:
+                local_support_count[res] += 1
+        queue.put(local_support_count)
+        if self.args.verbose:
+            print("Worker %2d: all done" % proc_idx)
+        return
+
+
 
     def run(self):
         for round_idx in range(1,self.args.round_threshold+1):
@@ -120,8 +134,31 @@ class TriehhHandler(Handler):
                     if vote is not None:
                         support_count[vote] += 1
             else:
-                print("Multi-processing is not implemented for triehh at this moment")
-                exit(0)
+                mananger = multiprocess.Manager()
+                queue = mananger.Queue()
+                jobs = []
+                workload = int(len(participents)/self.args.process)
+                for proc_idx in range(self.args.process):
+                    if proc_idx == self.args.process - 1:
+                        participents_load = participents[proc_idx*workload:len(participents)]
+                    else:
+                        participents_load = participents[proc_idx*workload:(proc_idx+1)*workload]
+                    p = multiprocess.Process(target=self.__worker,args=(proc_idx,round_idx,participents_load,queue))
+                    jobs.append(p)
+                    p.start()
+
+                for p in jobs:
+                    p.join()
+                
+                if self.args.verbose:
+                    print("Aggregating...")
+
+                results = [queue.get() for j in jobs]
+                for res in results:
+                    for key,value in res.items():
+                        support_count[key] += value
+            
+            
             
             update = 0
             for key, value in support_count.items():

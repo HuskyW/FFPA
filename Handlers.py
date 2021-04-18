@@ -85,14 +85,14 @@ class FastPubHandler(Handler):
             final_response[candi_save[i]] = response[i]
         return final_response
     
-    def later_round_worker(self,process_idx,candidates,participents,queue):
+    def later_round_worker(self,proc_idx,candidates,participents,queue):
         num_milestone = 5
         milestone = math.floor(len(participents)/num_milestone)
         local_support_count = defaultdict(lambda : 0)
         sampler = CandidateSampler(candidates)
         for idx in range(len(participents)):
-            if idx > 0 and idx % milestone == 0 and self.args.verbose:
-                print("Worker %2d: %d%% done" % (process_idx,int(round(idx*100/len(participents)))))
+            if idx > 0 and idx % milestone == 0 and int(idx/milestone) != num_milestone and self.args.verbose:
+                print("Worker %2d: %d%% done" % (proc_idx,int(round(idx*100/len(participents)))))
             
             client_idx = participents[idx]
             traj = self.dataset.get_trajectory(client_idx)
@@ -104,7 +104,7 @@ class FastPubHandler(Handler):
 
         queue.put(local_support_count)
         if self.args.verbose:
-            print("Worker %2d: all done" % process_idx)
+            print("Worker %2d: all done" % proc_idx)
         return
 
 
