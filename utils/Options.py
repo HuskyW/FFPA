@@ -8,7 +8,7 @@ def args_parser():
     parser.add_argument('--xi', type=float, default=0.1, help="allowed error rate for k-anonymity")
     parser.add_argument('--epsilon', type=float, default=10.0, help="param of LDP")
     parser.add_argument('--num_participants', type=int, default=300000, help="number of participating clients")
-    parser.add_argument('--mode', type=str, default='fastpub', help="mode: groundtruth || fastpub || triehh")
+    parser.add_argument('--mode', type=str, default='fastpub', help="mode: groundtruth || fastpub || triehh || sfp")
     parser.add_argument('--round_threshold', type=int, default=20, help="only work for triehh: maximum number of rounds")
 
     # Advanced params

@@ -5,6 +5,7 @@ from models.GroundTruth import groundTruth, groundTruthFromConfig
 from Handlers import FastPubHandler
 from Triehh import TriehhHandler
 from utils.Naming import GroundTruthPickleName
+from SFP import SfpHandler
 
 
 def ckeckWithGroundTruth(result,truth):
@@ -34,6 +35,7 @@ if __name__ == '__main__':
     else:
         print("Bad argument: dataset")
 
+    #dataset = [[1,4,7,8,3,5]]
 
     if args.mode == 'groundtruth':
         if args.dataset == 'zipf':
@@ -47,6 +49,8 @@ if __name__ == '__main__':
             handler = FastPubHandler(args,dataset)
         elif args.mode == 'triehh':
             handler = TriehhHandler(args,dataset)
+        elif args.mode == 'sfp':
+            handler = SfpHandler(args,dataset)
         fragments = handler.run()
         if args.verbose:
             for frag in fragments:

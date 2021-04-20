@@ -74,3 +74,6 @@ class DataSet():
 
     def get_traj_num(self):
         return len(self.record)
+
+    def __getitem__(self,index):
+        return self.get_trajectory(index).data
