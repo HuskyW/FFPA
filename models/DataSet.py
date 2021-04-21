@@ -1,3 +1,7 @@
+'''
+    Representation of trajectory and corresponding dataset in our work
+'''
+
 import numpy as np
 import random
 

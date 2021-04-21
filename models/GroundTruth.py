@@ -1,3 +1,7 @@
+'''
+    Calculate ground truth with standard Apriori algorithm
+'''
+
 from models.Candidate import generateCandidates
 from collections import defaultdict
 from models.DataSet import DataSet,Trajectory
@@ -127,6 +131,9 @@ def config_ground_truth_worker(dataset,process_idx,candidates,participents,weigh
     return
 
 def groundTruthFromConfig(config,args):
+    '''
+        Used for generated dataset (zipf) where config is simpler to estimate
+    '''
     metadata = config[1]
     record = config[0]
     n_loc = metadata['num_loc']

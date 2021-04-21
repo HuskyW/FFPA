@@ -76,7 +76,7 @@ class FastPubHandler(Handler):
         noisy_result = randomInt(real_result,self.eta[0],self.loc_num)
         return noisy_result
     
-    def later_round(self,traj,candidates):
+    def __later_round(self,traj,candidates):
         candi_len = len(candidates)
         candi_save = list(candidates)
         response = [0] * candi_len
@@ -89,7 +89,7 @@ class FastPubHandler(Handler):
             final_response[candi_save[i]] = response[i]
         return final_response
     
-    def later_round_worker(self,proc_idx,candidates,participents,queue):
+    def __later_round_worker(self,proc_idx,candidates,participents,queue):
         num_milestone = 5
         milestone = math.floor(len(participents)/num_milestone)
         local_support_count = defaultdict(lambda : 0)
@@ -101,7 +101,7 @@ class FastPubHandler(Handler):
             client_idx = participents[idx]
             traj = self.dataset.get_trajectory(client_idx)
             candis = sampler.sample(self.c_len[self.round])
-            res = self.later_round(traj,candis)
+            res = self.__later_round(traj,candis)
 
             for key,value in res.items():
                 local_support_count[key] += value
@@ -168,7 +168,7 @@ class FastPubHandler(Handler):
                     client_idx = participents[idx]
                     traj = self.dataset.get_trajectory(client_idx)
                     candis = sampler.sample(self.c_len[self.round])
-                    res = self.later_round(traj,candis)
+                    res = self.__later_round(traj,candis)
                     for key,value in res.items():
                         support_count[key] += value
             else:
@@ -181,7 +181,7 @@ class FastPubHandler(Handler):
                         participents_load = participents[proc_idx*workload:len(participents)]
                     else:
                         participents_load = participents[proc_idx*workload:(proc_idx+1)*workload]
-                    p = multiprocess.Process(target=self.later_round_worker,args=(proc_idx,candidates,participents_load,queue))
+                    p = multiprocess.Process(target=self.__later_round_worker,args=(proc_idx,candidates,participents_load,queue))
                     jobs.append(p)
                     p.start()
 

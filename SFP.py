@@ -1,3 +1,8 @@
+'''
+    Implementation of SFP algorithm proposed by Apple
+    See https://machinelearning.apple.com/research/learning-with-privacy-at-scale for details
+    Since the algorithm is too time-consuming, we only implement the multi-process version
+'''
 import hashlib
 import multiprocess
 import numpy as np
@@ -34,6 +39,10 @@ class SfpHandler(Handler):
         self.popular_threshold = self.args.sfp_threshold
 
         self.k_thres = (self.args.k * self.args.num_participants * self.args.k_cut) / (self.dataset.get_traj_num() * self.args.duplicate)
+
+        if self.args.process <= 0:
+            print('Our SFP implementation only works in multi-process')
+            exit(0)
         
     def __tailerTraj(self,idx):
         '''
