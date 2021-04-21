@@ -48,10 +48,14 @@ class FastPubHandler(Handler):
         p3 = math.sqrt(-math.log(self.args.xi)/(2*self.args.num_participants))
 
         p_softk = self.args.k/self.clients_num
-        if self.args.softk:
-            return self.args.num_participants*(p_softk+p3)
 
-        return self.args.num_participants*(p1+p2+p3)
+        intrinsic_thres = self.args.num_participants*(p1+p2+p3)
+        observative_thres = self.args.num_participants*(p_softk+p3)
+
+        if self.args.softk:
+            return observative_thres
+
+        return max(intrinsic_thres,observative_thres)
 
     def __calculateThresLonger(self,m): # m is times checked by clients for each candidate
         p1 = (self.args.k/self.clients_num)*(1-self.eta[self.round])
@@ -59,13 +63,13 @@ class FastPubHandler(Handler):
         p3 = math.sqrt(-math.log(self.args.xi)/(2*m))
         p_softk = self.args.k/self.clients_num
         
-        if self.args.softk is False:
-            return m*(p1+p2+p3)
+        intrinsic_thres = m*(p1+p2+p3)
+        observative_thres = m*(p_softk+p3)
 
-        if self.round == self.args.l-1:
-            return m*(p1+p2+p3)
+        if self.args.softk is True or self.round != self.args.l-1:
+            return observative_thres
 
-        return m*(p_softk+p3)     
+        return max(intrinsic_thres,observative_thres)   
 
     def __first_round(self,traj):
         real_result = traj.uploadOne()
