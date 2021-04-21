@@ -2,7 +2,7 @@
     Calculate ground truth with standard Apriori algorithm
 '''
 
-from models.Candidate import generateCandidates
+from utils.Candidate import generateCandidates
 from collections import defaultdict
 from models.DataSet import DataSet,Trajectory
 from utils.Naming import GroundTruthPickleName

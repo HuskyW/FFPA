@@ -2,10 +2,10 @@ from LoadData import loadMsnbc
 from utils.Options import args_parser
 import pickle
 from models.GroundTruth import groundTruth, groundTruthFromConfig
-from Handlers import FastPubHandler
-from Triehh import TriehhHandler
+from models.Handlers import FastPubHandler
+from models.Triehh import TriehhHandler
 from utils.Naming import GroundTruthPickleName
-from SFP import SfpHandler
+from models.SFP import SfpHandler
 
 
 def ckeckWithGroundTruth(result,truth):

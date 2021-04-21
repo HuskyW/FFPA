@@ -1,4 +1,4 @@
-from Handlers import Handler
+from models.Handlers import Handler
 from utils.Sampling import sampleClients
 from utils.Print import printRound
 import multiprocess

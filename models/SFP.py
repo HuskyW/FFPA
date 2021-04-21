@@ -9,7 +9,7 @@ import numpy as np
 import math
 import random
 
-from Handlers import Handler
+from models.Handlers import Handler
 from utils.Sampling import sampleClients
 import itertools
 

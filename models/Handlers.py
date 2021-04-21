@@ -6,7 +6,7 @@ from utils.Randomize import *
 import math
 import numpy as np
 from collections import defaultdict
-from models.Candidate import generateCandidates
+from utils.Candidate import generateCandidates
 from utils.Sampling import CandidateSampler, sampleClients
 from utils.Print import printRound
 import multiprocess
