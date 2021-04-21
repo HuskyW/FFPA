@@ -28,6 +28,9 @@ def args_parser():
 
     parser.add_argument('--process', type=int, default=0, help="number of worker processes, 0: single process")
 
+    # SFP params
+    parser.add_argument('--sfp_threshold', type=int, default=10, help="number of popular 2-fragments at each location")
+    parser.add_argument('--k_cut', type=float, default=1, help="cut down the value of k for better performance")
 
     args = parser.parse_args()
     return args

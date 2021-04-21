@@ -28,10 +28,12 @@ class SfpHandler(Handler):
             self.salts_a.append(str(i))
             self.salts_b.append(str(i+self.hash_num))
 
-        self.epsilon_a = 2
+        self.epsilon_a = 4
         self.epsilon_b = self.args.epsilon - self.epsilon_a
 
-        self.popular_threshold = 10
+        self.popular_threshold = self.args.sfp_threshold
+
+        self.k_thres = (self.args.k * self.args.num_participants * self.args.k_cut) / (self.dataset.get_traj_num() * self.args.duplicate)
         
     def __tailerTraj(self,idx):
         '''
@@ -92,7 +94,7 @@ class SfpHandler(Handler):
         '''
             a noisy matrix of -1 and 1
         '''
-        possi = (math.e**(epsilon / 2.0) + 1.0) / (math.e**(epsilon / 2.0) - 1.0)
+        possi = (math.e**(epsilon / 2.0)) / (math.e**(epsilon / 2.0) + 1.0)
         res = np.zeros(self.hash_size,dtype='float')
         for i in range(self.hash_size):
             if np.random.rand() < possi:
@@ -102,9 +104,10 @@ class SfpHandler(Handler):
         return res
 
     def __cEpsilon(self,epsilon):
-        top = math.e ** (epsilon/2) + 1
-        bottom = math.e ** (epsilon/2) - 1
-        return top/(2*bottom)
+        top = math.e ** (epsilon/2.0) + 1.0
+        bottom = math.e ** (epsilon/2.0) - 1.0
+        res = top/(2.0 * bottom)
+        return res
     
     def __noisyRowMatrix(self,target_idx,epsilon):
         '''
@@ -223,6 +226,22 @@ class SfpHandler(Handler):
             print("Worker %2d: all done" % proc_idx)
         return
 
+    def __finalCheckWorker(self,a_cms,workload,queue,proc_idx):
+        passed = []
+        num_milestone = 5
+        milestone = math.floor(len(workload)/num_milestone)
+        for idx in range(len(workload)):
+            if idx > 0 and idx % milestone == 0 and int(idx/milestone) != num_milestone and self.args.verbose:
+                print("Worker %2d: %d%% done" % (proc_idx,int(round(idx*100/len(workload)))))
+            candidate = workload[idx]
+            f = self.__estimateFeq(a_cms,str(candidate),0)
+            if f >= self.k_thres:
+                passed.append(candidate)
+        queue.put(passed)
+        if self.args.verbose:
+            print("Worker %2d: all done" % proc_idx)
+        return
+
 
     def run(self):
         participents = sampleClients(self.args,self.dataset.get_traj_num(),self.args.num_participants)
@@ -308,16 +327,39 @@ class SfpHandler(Handler):
             merged_candidates.append(temp)
         
         print('Merged candidate generated')
+        print('Final checking...')
+        mananger = multiprocess.Manager()
+        queue = mananger.Queue()
+        jobs = []
+        workload = math.floor(len(merged_candidates)/self.args.process)
+        for proc_idx in range(self.args.process):
+            if proc_idx == self.args.process - 1:
+                process_load = merged_candidates[proc_idx*workload:len(merged_candidates)]
+            else:
+                process_load = merged_candidates[proc_idx*workload:(proc_idx+1)*workload]
+            
+            p = multiprocess.Process(target=self.__finalCheckWorker,args=(a_cms,process_load,queue,proc_idx))
+            jobs.append(p)
+            p.start()
+
+        for p in jobs:
+            p.join()
+
+        results = [queue.get() for j in jobs]
         
         desired = []
+        for res in results:
+            desired.extend(res)
+        '''
         for candi in merged_candidates:
             f = self.__estimateFeq(a_cms,str(target),0)
-            if f >= self.args.k:
+            if f >= self.k_thres:
                 desired.append(candi)
+        '''
         
         print(len(desired))
 
-        cutted = self.__fixResLength(merged_candidates)
+        cutted = self.__fixResLength(desired)
         
 
         return cutted
