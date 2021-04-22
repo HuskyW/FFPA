@@ -49,9 +49,7 @@ wheels/
 venv/
 ENV/
 
-data/
-save/
-templog
+data/*
 *.xlsx
 *.xls
 *.docx
