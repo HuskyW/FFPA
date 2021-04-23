@@ -17,7 +17,7 @@ def args_parser():
     parser.add_argument('--admit_threshold', type=int, default=-1, help="Number of admit fragments in each round, -1: no thresholding")
     
     # Settings
-    parser.add_argument('--dataset', type=str, default='msnbc', help="msnbc || zipf")
+    parser.add_argument('--dataset', type=str, default='msnbc', help="msnbc || zipf || oldenburg")
     parser.add_argument('--duplicate', type=int, default=1, help="virtually duplicate the dataset")
     parser.add_argument('--load_pickle', action='store_true', help='read dataset form pickle file')
     parser.add_argument('--write_pickle', action='store_true', help='store dataset into pickle file, do not work when --load_pickle is activated')

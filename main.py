@@ -32,6 +32,9 @@ if __name__ == '__main__':
             dataset = pickle.load(fp)
         with open('data/zipf_config.pickle','rb') as fp:
             config = pickle.load(fp)
+    elif args.dataset == 'oldenburg':
+        with open('data/oldenburg.pickle','rb') as fp:
+            dataset = pickle.load(fp)
     else:
         print("Bad argument: dataset")
 
@@ -59,7 +62,7 @@ if __name__ == '__main__':
 
     if args.dataset == 'zipf':
         ground_truth = groundTruthFromConfig(config,args)
-    elif args.dataset == 'msnbc':
+    elif args.dataset == 'msnbc' or args.dataset == 'oldenburg':
         pickleName = GroundTruthPickleName(args)
         with open(pickleName,'rb') as fp:
             ground_truth = pickle.load(fp)
