@@ -31,9 +31,9 @@ class SfpHandler(Handler):
         
         for i in range(self.hash_num):
             self.salts_a.append(str(i))
-            self.salts_b.append(str(i+self.hash_num))
+            self.salts_b.append(str(-i))
 
-        self.epsilon_a = 4
+        self.epsilon_a = 0.25 * self.args.epsilon
         self.epsilon_b = self.args.epsilon - self.epsilon_a
 
         self.popular_threshold = self.args.sfp_threshold
@@ -335,7 +335,7 @@ class SfpHandler(Handler):
                 temp.extend(list(target[i]))
             merged_candidates.append(temp)
         
-        print('Merged candidate generated')
+        print('Merged candidate generated: %d' % len(merged_candidates))
         print('Final checking...')
         mananger = multiprocess.Manager()
         queue = mananger.Queue()
@@ -359,17 +359,11 @@ class SfpHandler(Handler):
         desired = []
         for res in results:
             desired.extend(res)
-        '''
-        for candi in merged_candidates:
-            f = self.__estimateFeq(a_cms,str(target),0)
-            if f >= self.k_thres:
-                desired.append(candi)
-        '''
         
-        print(len(desired))
+        print('Final checking complete: %d' % len(desired))
 
         cutted = self.__fixResLength(desired)
-        
+        print('Target fragment found: %d' % len(cutted))
 
         return cutted
 
