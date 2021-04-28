@@ -66,7 +66,7 @@ class FastPubHandler(Handler):
         intrinsic_thres = m*(p1+p2+p3)
         observative_thres = m*(p_softk+p3)
 
-        if self.args.softk is True or self.round != self.args.l-1:
+        if self.args.softk is True and self.round != self.args.l-1:
             return observative_thres
 
         return max(intrinsic_thres,observative_thres)   

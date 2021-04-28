@@ -44,9 +44,9 @@ class SfpHandler(Handler):
             print('Our SFP implementation only works in multi-process')
             exit(0)
         
-    def __tailerTraj(self,idx):
+    def __trimTraj(self,idx):
         '''
-            Tailer the original trajectory into a fixed length
+            Trim the original trajectory into a fixed length
         '''
         traj = list(self.dataset[idx])
         if len(traj) == self.fixed_traj_len:
@@ -56,8 +56,9 @@ class SfpHandler(Handler):
                 traj.append(-1)
             return traj
         head = np.random.randint(len(traj) - self.fixed_traj_len + 1)
-        tailered = traj[head:head+self.fixed_traj_len]
-        return tailered
+        trimed = traj[head:head+self.fixed_traj_len]
+        #trimed = traj[0:self.fixed_traj_len]
+        return trimed
 
     def __fixResLength(self,orig):
         '''
@@ -129,7 +130,7 @@ class SfpHandler(Handler):
         c_ep = self.__cEpsilon(epsilon)
         multiplied = c_ep * multiplied
         multiplied = multiplied + 0.5
-        multiplied = self.hash_size * multiplied
+        multiplied = self.hash_num * multiplied
         return multiplied
 
     def __clientHashOracle(self,traj):
@@ -154,7 +155,7 @@ class SfpHandler(Handler):
         '''
             All encoding works for a client
         '''
-        traj = self.__tailerTraj(idx)
+        traj = self.__trimTraj(idx)
         a_res, a_hashidx = self.__clientHashMain(traj)
         b_res, b_hashidx, l = self.__clientHashOracle(traj)
         a_resmatrix = self.__noisyRowMatrix(a_res,self.epsilon_a)
