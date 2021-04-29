@@ -53,6 +53,13 @@ class OldenburgLoader():
         
 
 if __name__ == '__main__':
+    filepathes = []
+    for i in range(20):
+        path = './data/oldenburg/1mfast_' + str(i) + '.dat'
+        filepathes.append(path)
     loader = OldenburgLoader()
-    loader.readFile('./data/oldenburg/1mfast_1.dat')
+    for ipath in filepathes:
+        loader.readFile(ipath)
+        print('%s loaded' % ipath)
     loader.save('./data/oldenburg.pickle')
+    print('Dataset created')
