@@ -6,6 +6,7 @@ from models.Handlers import FastPubHandler
 from models.Triehh import TriehhHandler
 from utils.Naming import GroundTruthPickleName
 from models.SFP import SfpHandler
+from utils.Print import printLog
 
 
 def ckeckWithGroundTruth(result,truth):
@@ -16,7 +17,7 @@ def ckeckWithGroundTruth(result,truth):
     precision = tp/len(result)
     recall = tp/len(truth)
     print("Precision: %.2f; Recall: %.2f" % (precision,recall))
-    return
+    return precision, recall
 
 
 if __name__ == '__main__':
@@ -66,5 +67,11 @@ if __name__ == '__main__':
         pickleName = GroundTruthPickleName(args)
         with open(pickleName,'rb') as fp:
             ground_truth = pickle.load(fp)
-    ckeckWithGroundTruth(fragments,ground_truth)
+    precision, recall = ckeckWithGroundTruth(fragments,ground_truth)
+
+    if args.mode != 'groundtruth':
+        log = printLog(args,(precision,recall))
+        with open('./save/log','a') as fp:
+            fp.write(log)
+
 

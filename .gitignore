@@ -64,3 +64,4 @@ analysis/
 *.sh
 
 *.pickle
+log
