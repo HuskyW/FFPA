@@ -67,7 +67,12 @@ if __name__ == '__main__':
         pickleName = GroundTruthPickleName(args)
         with open(pickleName,'rb') as fp:
             ground_truth = pickle.load(fp)
-    precision, recall = ckeckWithGroundTruth(fragments,ground_truth)
+    if len(fragments) > 0:
+        precision, recall = ckeckWithGroundTruth(fragments,ground_truth)
+    else:
+        print("No fragment published")
+        precision = -1.0
+        recall = 0.0
 
     if args.mode != 'groundtruth':
         log = printLog(args,(precision,recall))
