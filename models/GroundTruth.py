@@ -19,9 +19,8 @@ def ground_truth_worker(dataset,process_idx,candidates,participents,queue,verbos
         if idx > 0 and idx % milestone == 0 and verbose:
             print("Worker %2d: %d%% done" % (process_idx,int(round(idx*100/len(participents)))))
         client_idx = participents[idx]
-        traj = dataset.get_trajectory(client_idx)
         for candi in candidates:
-            if traj.checkSubSeq(candi) is True:
+            if dataset.checkSubSeq(client_idx,candi) is True:
                 local_support_count[candi] += 1
 
     queue.put(local_support_count)
@@ -38,8 +37,7 @@ def groundTruth(dataset,args):
     printRound(1)
     support_count = defaultdict(lambda : 0)
     for traj_idx in range(traj_num):
-        traj = dataset.get_trajectory(traj_idx)
-        locations = traj.allLocations()
+        locations = dataset.allLocations(traj_idx)
         for loc in locations:
             support_count[loc] += 1
     # filter out

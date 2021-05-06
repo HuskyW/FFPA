@@ -88,13 +88,13 @@ class TriehhHandler(Handler):
         self.threshold = self.args.num_participants * self.args.k / self.client_num
 
     def clientVote(self,traj,curr_round):
-        if traj.data_length < curr_round:
+        if len(traj) < curr_round:
             return None
-        trie = traj.data[0:curr_round-1]
+        trie = traj[0:curr_round-1]
         prefix = self.tree.checkTrie(trie)
         if prefix is None:
             return None
-        return (prefix,traj.data[curr_round-1])
+        return (prefix,traj[curr_round-1])
 
     def fixTrieLength(self,tries):
         res = set()
@@ -110,7 +110,7 @@ class TriehhHandler(Handler):
         local_support_count = defaultdict(lambda : 0)
         for i in range(len(participents)):
             client_idx = participents[i]
-            res = self.clientVote(self.dataset.get_trajectory(client_idx),curr_round)
+            res = self.clientVote(self.dataset[client_idx],curr_round)
             if res is not None:
                 local_support_count[res] += 1
         queue.put(local_support_count)

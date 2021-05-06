@@ -22,8 +22,8 @@ def loadMsnbc(minLength=None,maxLength=None,dump=True):
         if maxLength is not None and len(line_split) > maxLength:
             continue
 
-        traj = Trajectory(line_split)
-        dataset.add_trajectory(traj)
+        #traj = Trajectory(line_split)
+        dataset.add_trajectory(line_split)
 
     if dump is True:
         with open('data/msnbc.pickle', 'wb') as fp:

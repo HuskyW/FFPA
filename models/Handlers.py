@@ -52,12 +52,12 @@ class FastPubHandler(Handler):
         return max(intrinsic_thres,observative_thres)   
 
     
-    def __one_client(self,traj,candidates):
+    def __one_client(self,client_idx,candidates):
         candi_len = len(candidates)
         candi_save = list(candidates)
         response = [0] * candi_len
         for i in range(len(candidates)):
-            if traj.checkSubSeq(candi_save[i]) is True:
+            if self.dataset.checkSubSeq(client_idx,candi_save[i]) is True:
                 response[i] = 1
         response = randomBits(response,self.eta[self.round])
         final_response = {}
@@ -75,9 +75,8 @@ class FastPubHandler(Handler):
                 print("Worker %2d: %d%% done" % (proc_idx,int(round(idx*100/len(participents)))))
             
             client_idx = participents[idx]
-            traj = self.dataset.get_trajectory(client_idx)
             candis = sampler.sample(self.c_len[self.round])
-            res = self.__one_client(traj,candis)
+            res = self.__one_client(client_idx,candis)
 
             for key,value in res.items():
                 local_support_count[key] += value
@@ -132,9 +131,8 @@ class FastPubHandler(Handler):
                     if idx % 100000 == 0 and idx > 0 and self.args.verbose:
                         print("%d trajectories checked" % idx)
                     client_idx = participents[idx]
-                    traj = self.dataset.get_trajectory(client_idx)
                     candis = sampler.sample(self.c_len[self.round])
-                    res = self.__one_client(traj,candis)
+                    res = self.__one_client(client_idx,candis)
                     for key,value in res.items():
                         support_count[key] += value
             else:

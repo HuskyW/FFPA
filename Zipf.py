@@ -32,8 +32,8 @@ def generateZipf(n_traj=1000000,n_loc=20,n_traj_options=5000,l=10):
             print("%d records generated" % i)
         selected_idx = np.random.choice(n_traj_options,p=weights_norm)
         selected_list = candidates[selected_idx]
-        selected_traj = Trajectory(selected_list)
-        dataset.add_trajectory(selected_traj)
+        #selected_traj = Trajectory(selected_list)
+        dataset.add_trajectory(selected_list)
 
         selected_conf = tuple(selected_list)
         if selected_conf not in record.keys():

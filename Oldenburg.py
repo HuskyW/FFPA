@@ -48,8 +48,8 @@ class OldenburgLoader():
             else:
                 record[traj_idx].append(pos)
         for key, value in record.items():
-            traj = Trajectory(value)
-            self.dataset.add_trajectory(traj)
+            #traj = Trajectory(value)
+            self.dataset.add_trajectory(value)
         
 
 if __name__ == '__main__':

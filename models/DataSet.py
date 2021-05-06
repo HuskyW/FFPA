@@ -71,7 +71,7 @@ class DataSet():
         self.record = []
 
     def add_trajectory(self,trajectory):
-        self.record.append(trajectory)
+        self.record.append(np.array(trajectory,dtype='int'))
     
     def get_trajectory(self,index):
         return self.record[index]
@@ -80,4 +80,19 @@ class DataSet():
         return len(self.record)
 
     def __getitem__(self,index):
-        return self.get_trajectory(index).data
+        return self.get_trajectory(index)
+    
+    def uploadOne(self,idx):
+        return random.choice(self.record[idx])
+
+    def checkSubSeq(self,idx,query):
+        if KMP_algorithm(self.record[idx],query) == -1:
+            return False
+        return True
+
+    def randomFragment(self,idx,fragment_length):
+        index = np.random.randint(len(self.record[idx])-fragment_length)
+        return self.record[idx][index:index+fragment_length]
+
+    def allLocations(self,idx):
+        return set(self.record[idx])
