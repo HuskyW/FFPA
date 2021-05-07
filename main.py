@@ -30,7 +30,7 @@ def getGroundTruth(args):
     elif os.path.isfile(scName):
         with open(scName,'rb') as fp:
             sc_rec = pickle.load(fp)
-            if sc_rec['k'] > args.k:
+            if sc_rec['k'] > (args.k/args.duplicate):
                 print("Support count record invalid")
                 exit(0)
             data = sc_rec['data']

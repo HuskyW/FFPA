@@ -109,7 +109,7 @@ def groundTruth(dataset,args):
 
     support_count_record = {}
     support_count_record['data'] = results
-    support_count_record['k'] = args.k
+    support_count_record['k'] = k
     scName = SupportCountPickleName(args)
     with open(scName,'wb') as fp:
         pickle.dump(support_count_record,fp)
