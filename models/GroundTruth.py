@@ -5,7 +5,7 @@
 from utils.Candidate import generateCandidates
 from collections import defaultdict
 from models.DataSet import DataSet,Trajectory
-from utils.Naming import GroundTruthPickleName
+from utils.Naming import GroundTruthPickleName, SupportCountPickleName
 import pickle
 import multiprocess
 import math
@@ -106,6 +106,13 @@ def groundTruth(dataset,args):
     results = sorted(results,key=lambda item:item[1],reverse=True)
     for frag in results:
         print('%s: %d' % (str(frag[0]),frag[1]))
+
+    support_count_record = {}
+    support_count_record['data'] = results
+    support_count_record['k'] = args.k
+    scName = SupportCountPickleName(args)
+    with open(scName,'wb') as fp:
+        pickle.dump(support_count_record,fp)
 
     return fragments
 

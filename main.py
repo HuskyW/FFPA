@@ -4,9 +4,10 @@ import pickle
 from models.GroundTruth import groundTruth, groundTruthFromConfig
 from models.Handlers import FastPubHandler
 from models.Triehh import TriehhHandler
-from utils.Naming import GroundTruthPickleName
+from utils.Naming import GroundTruthPickleName, SupportCountPickleName
 from models.SFP import SfpHandler
 from utils.Print import printLog
+import os
 
 
 def ckeckWithGroundTruth(result,truth):
@@ -18,6 +19,25 @@ def ckeckWithGroundTruth(result,truth):
     recall = tp/len(truth)
     print("Precision: %.2f; Recall: %.2f" % (precision,recall))
     return precision, recall
+
+def getGroundTruth(args):
+    pickleName = GroundTruthPickleName(args)
+    scName = SupportCountPickleName(args)
+    if os.path.isfile(pickleName):
+        with open(pickleName,'rb') as fp:
+            ground_truth = pickle.load(fp)
+        return ground_truth
+    elif os.path.isfile(scName):
+        with open(scName,'rb') as fp:
+            sc_rec = pickle.load(fp)
+            if sc_rec['k'] > args.k:
+                print("Support count record invalid")
+                exit(0)
+            data = sc_rec['data']
+            ground_truth = [i[0] for i in data if i[1] >= args.k]
+            return ground_truth
+    print("Ground truth not generated yet")
+    exit(0)
 
 
 if __name__ == '__main__':
@@ -64,9 +84,7 @@ if __name__ == '__main__':
     if args.dataset == 'zipf':
         ground_truth = groundTruthFromConfig(config,args)
     elif args.dataset == 'msnbc' or args.dataset == 'oldenburg':
-        pickleName = GroundTruthPickleName(args)
-        with open(pickleName,'rb') as fp:
-            ground_truth = pickle.load(fp)
+        ground_truth = getGroundTruth(args)
     if len(fragments) > 0:
         precision, recall = ckeckWithGroundTruth(fragments,ground_truth)
     else:
