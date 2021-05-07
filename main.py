@@ -34,7 +34,7 @@ def getGroundTruth(args):
                 print("Support count record invalid")
                 exit(0)
             data = sc_rec['data']
-            ground_truth = [i[0] for i in data if i[1] >= args.k]
+            ground_truth = [i[0] for i in data if i[1] >= (args.k/args.duplicate)]
             return ground_truth
     print("Ground truth not generated yet")
     exit(0)
