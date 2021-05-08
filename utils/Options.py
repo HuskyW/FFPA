@@ -22,7 +22,7 @@ def args_parser():
     parser.add_argument('--load_pickle', action='store_true', help='read dataset form pickle file')
     parser.add_argument('--write_pickle', action='store_true', help='store dataset into pickle file, do not work when --load_pickle is activated')
 
-    parser.add_argument('--min_length', type=int, default=None, help="minimal length of each trajectory")
+    parser.add_argument('--min_length', type=int, default=3, help="minimal length of each trajectory")
     parser.add_argument('--max_length', type=int, default=None, help="maximal length of each trajectory")
     parser.add_argument('--verbose', action='store_true', help='verbose print')
 
