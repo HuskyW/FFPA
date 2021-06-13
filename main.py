@@ -1,11 +1,9 @@
 from LoadData import loadMsnbc
 from utils.Options import args_parser
 import pickle
-from models.GroundTruth import groundTruth, groundTruthFromConfig
-from models.Handlers import FastPubHandler
-from models.Triehh import TriehhHandler
+from models.GroundTruth import groundTruth
+from models.Handlers import FfpaHandler
 from utils.Naming import GroundTruthPickleName, SupportCountPickleName
-from models.SFP import SfpHandler
 from utils.Print import printLog
 import os
 
@@ -69,32 +67,9 @@ if __name__ == '__main__':
             fragments = groundTruth(dataset,args)
             print(fragments)
     else:  
-        if args.mode == 'fastpub':
-            handler = FastPubHandler(args,dataset)
-        elif args.mode == 'triehh':
-            handler = TriehhHandler(args,dataset)
-        elif args.mode == 'sfp':
-            handler = SfpHandler(args,dataset)
+        if args.mode == 'ffpa':
+            handler = FfpaHandler(args,dataset)
         fragments = handler.run()
         if args.verbose:
-            for frag in fragments:
-                print(frag)
-
-
-    if args.dataset == 'zipf':
-        ground_truth = groundTruthFromConfig(config,args)
-    elif args.dataset == 'msnbc' or args.dataset == 'oldenburg':
-        ground_truth = getGroundTruth(args)
-    if len(fragments) > 0:
-        precision, recall = ckeckWithGroundTruth(fragments,ground_truth)
-    else:
-        print("No fragment published")
-        precision = -1.0
-        recall = 0.0
-
-    if args.mode != 'groundtruth':
-        log = printLog(args,(precision,recall))
-        with open('./save/log','a') as fp:
-            fp.write(log)
-
+            print(fragments)
 

@@ -40,59 +40,54 @@ def KMP_algorithm(string, substring):
         return -1
             
 
+# class Trajectory is used in the dataset
+# for candidates, it is stored in the form of id(tuple)
+
 
 class Trajectory():
     # One trajectory record
     def __init__(self,data):
         self.data = np.array(data,dtype='int')
         self.data_length = len(data)
-    
-    def uploadOne(self):
-        return random.choice(self.data)
 
-    def checkSubSeq(self,query):
+    def checkSub(self,query):
         if KMP_algorithm(self.data,query) == -1:
             return False
         return True
 
-    def randomFragment(self,fragment_length):
-        index = np.random.randint(self.data_length-fragment_length)
-        return self.data[index:index+fragment_length]
+    def length(self):
+        return self.data_length
 
-    def allLocations(self):
-        return set(self.data)
+    def __eq__(self,other):
+        if self.data.shape != other.data.shape:
+            return False
+        comp = (self.data == other.data)
+        return comp.all()
 
-    def spellData(self):
-        print(list(self.data))
+    def id(self):
+        return tuple(self.data)
 
-class DataSet():
-    def __init__(self,location_num):
-        self.location_num = location_num
+
+class SeqDataSet():
+    def __init__(self,points):
+        self.points = points
         self.record = []
 
-    def add_trajectory(self,trajectory):
-        self.record.append(np.array(trajectory,dtype='int'))
+    def add_line(self,line):
+        self.record.append(line)
     
-    def get_trajectory(self,index):
+    def get_line(self,index):
         return self.record[index]
 
-    def get_traj_num(self):
+    def get_line_num(self):
         return len(self.record)
 
     def __getitem__(self,index):
-        return self.get_trajectory(index)
-    
-    def uploadOne(self,idx):
-        return random.choice(self.record[idx])
+        return self.get_line(index)
 
-    def checkSubSeq(self,idx,query):
-        if KMP_algorithm(self.record[idx],query) == -1:
-            return False
-        return True
-
-    def randomFragment(self,idx,fragment_length):
-        index = np.random.randint(len(self.record[idx])-fragment_length)
-        return self.record[idx][index:index+fragment_length]
-
-    def allLocations(self,idx):
-        return set(self.record[idx])
+    def init_candidate(self):
+        candidates = []
+        for p in self.points:
+            candi = tuple([p])
+            candidates.append(candi)
+        return candidates

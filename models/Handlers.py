@@ -1,15 +1,17 @@
 '''
-    Handler of FastPub, an FastPubHandler instance an do all works of trajectory publication given the dataset
+    Handler of FFPA
 '''
 import abc
-from utils.Randomize import *
 import math
 import numpy as np
-from collections import defaultdict
-from utils.Candidate import generateCandidates
-from utils.Sampling import CandidateSampler, sampleClients
-from utils.Print import printRound
 import multiprocess
+from collections import defaultdict
+
+
+from utils.Sampling import sampleClients
+from utils.Print import printRound
+from models.Sandwich import FfpaServer
+from models.Randomize import Randomizer
 
 
 class Handler(metaclass=abc.ABCMeta):
@@ -18,164 +20,102 @@ class Handler(metaclass=abc.ABCMeta):
         pass
 
 
-class FastPubHandler(Handler):
+class FfpaHandler(Handler):
     def __init__(self,args,dataset):
         self.args = args
+        self.args.eta = self.__calculateEta()
         self.dataset = dataset
-        self.orig_traj_num = self.dataset.get_traj_num()
-        self.clients_num = self.dataset.get_traj_num() * self.args.duplicate
-        self.loc_num = self.dataset.location_num
+        self.orig_rec_num = self.dataset.get_line_num()
+        self.clients_num = self.orig_rec_num * self.args.duplicate
+        self.server = FfpaServer(self.args)
+        self.randomizer = Randomizer(self.args)
+        init_candidates = self.dataset.init_candidate()
+        for candi in init_candidates:
+            self.server.initCandidate(candi)
+
         self.round = 0
-        self.eta = [0] * self.args.l
-        self.thres = [0] * self.args.l
-        self.c_len = [0] * self.args.l
-
-
 
     def __calculateEta(self):
         epsilon = self.args.epsilon
-        return 1/(1 + math.pow(math.e,(epsilon/self.c_len[self.round])))
+        candidates = self.args.num_candidate
+        return 1/(1 + math.pow(math.e,(epsilon/candidates)))
 
 
-    def __calculateThres(self,m): # m is times checked by clients for each candidate
-        p1 = (self.args.k/self.clients_num)*(1-self.eta[self.round])
-        p2 = ((self.clients_num-self.args.k)/self.clients_num) * self.eta[self.round]
-        p3 = math.sqrt(-math.log(self.args.xi)/(2*m))
-        p_softk = self.args.k/self.clients_num
-        
-        intrinsic_thres = m*(p1+p2+p3)
-        observative_thres = m*(p_softk+p3)
-
-        if self.args.softk is True and self.round != self.args.l-1:
-            return observative_thres
-
-        return max(intrinsic_thres,observative_thres)   
-
-    
-    def __one_client(self,client_idx,candidates):
+    def __oneClient(self,client_idx,candidates):
+ 
         candi_len = len(candidates)
         candi_save = list(candidates)
         response = [0] * candi_len
         for i in range(len(candidates)):
-            if self.dataset.checkSubSeq(client_idx,candi_save[i]) is True:
+            if self.dataset[client_idx].checkSub(candi_save[i]) is True:
                 response[i] = 1
-        response = randomBits(response,self.eta[self.round])
+        response = self.randomizer.randomBits(response)
         final_response = {}
         for i in range(len(candidates)):
             final_response[candi_save[i]] = response[i]
         return final_response
-    
-    def __one_round_worker(self,proc_idx,candidates,participents,queue):
-        num_milestone = 5
-        milestone = math.floor(len(participents)/num_milestone)
-        local_support_count = defaultdict(lambda : 0)
-        sampler = CandidateSampler(candidates)
+
+
+    def __processWorker(self,proc_idx,participents,queue):     
+        support_count = defaultdict(lambda : 0)
         for idx in range(len(participents)):
-            if idx > 0 and idx % milestone == 0 and int(idx/milestone) != num_milestone and self.args.verbose:
-                print("Worker %2d: %d%% done" % (proc_idx,int(round(idx*100/len(participents)))))
-            
             client_idx = participents[idx]
-            candis = sampler.sample(self.c_len[self.round])
-            res = self.__one_client(client_idx,candis)
-
+            candidates = self.server.drawCandidate(self.args.num_candidate)
+            res = self.__oneClient(client_idx,candidates)
             for key,value in res.items():
-                local_support_count[key] += value
+                if key not in support_count.keys():
+                    support_count[key] = [0,0]
+                support_count[key][value] += 1
 
-        queue.put(local_support_count)
-        if self.args.verbose:
-            print("Worker %2d: all done" % proc_idx)
+        queue.put(support_count)
         return
 
 
-    def __filterCandidates(self,support_count):
-        exceed_k = [key for key,value in support_count.items() if value >= self.thres[self.round]]
-        if self.args.admit_threshold < 0 or len(exceed_k) < self.args.admit_threshold:
-            return exceed_k
-        sc_sorted = sorted(support_count.items(),key=lambda item:item[1],reverse=True)
-        res = []
-        for i in range(self.args.admit_threshold):
-            res.append(sc_sorted[i][0])
-        return res
-        
-        
 
     def run(self):
-
-        # publish longer fragments
-        for fragment_len in range(0,self.args.l):
-            self.round = fragment_len
-            printRound(fragment_len+1)
-            if fragment_len != 0:
-                candidates = generateCandidates(fragments)
-            else:
-                candidates = []
-                for i in range(self.loc_num):
-                    candidates.append((i,))
-            print("%d-fragments: %d candidates" % (fragment_len+1,len(candidates)))
-            if len(candidates) == 0:
-                print('No candidate with length ' + str(fragment_len+1))
-                return None
-
-            self.c_len[fragment_len] = min(self.args.c_max,len(candidates))
-            self.eta[fragment_len] = self.__calculateEta()
-
-            sampler = CandidateSampler(candidates)
-
-            participents = sampleClients(self.args,self.orig_traj_num,self.args.num_participants)
+        while True:
+            if self.server.terminal() is True:
+                print('Terminal')
+                return self.server.accept_pool.outputSuper()
+            self.round += 1
+            printRound(self.round)
+            print("Candidate left: %d" % self.server.candidateNum())
+            participents = sampleClients(self.args,self.orig_rec_num)
 
             support_count = defaultdict(lambda : 0)
+
+            mananger = multiprocess.Manager()
+            queue = mananger.Queue()
+            jobs = []
+            workload = math.floor(len(participents)/self.args.process)
+
+            for proc_idx in range(self.args.process):
+                if proc_idx == self.args.process - 1:
+                    participents_load = participents[proc_idx*workload:len(participents)]
+                else:
+                    participents_load = participents[proc_idx*workload:(proc_idx+1)*workload]
+                p = multiprocess.Process(target=self.__processWorker,args=(proc_idx,participents_load,queue))
+                jobs.append(p)
+                p.start()
+
+            for p in jobs:
+                p.join()
+
+
+            results = [queue.get() for j in jobs]
+
+            for res in results:
+                for key,value in res.items():
+                    if key not in support_count.keys():
+                        support_count[key] = [0,0]
+                    support_count[key][0] += value[0]
+                    support_count[key][1] += value[1]
+        
             
-                
-            if self.args.process <= 0:
-                for idx in range(len(participents)):
-                    if idx % 100000 == 0 and idx > 0 and self.args.verbose:
-                        print("%d trajectories checked" % idx)
-                    client_idx = participents[idx]
-                    candis = sampler.sample(self.c_len[self.round])
-                    res = self.__one_client(client_idx,candis)
-                    for key,value in res.items():
-                        support_count[key] += value
-            else:
-                mananger = multiprocess.Manager()
-                queue = mananger.Queue()
-                jobs = []
-                workload = math.floor(len(participents)/self.args.process)
-                for proc_idx in range(self.args.process):
-                    if proc_idx == self.args.process - 1:
-                        participents_load = participents[proc_idx*workload:len(participents)]
-                    else:
-                        participents_load = participents[proc_idx*workload:(proc_idx+1)*workload]
-                    p = multiprocess.Process(target=self.__one_round_worker,args=(proc_idx,candidates,participents_load,queue))
-                    jobs.append(p)
-                    p.start()
+            accept, reject = self.server.uploadSupportCount(support_count)
 
-                for p in jobs:
-                    p.join()
-                
-                if self.args.verbose:
-                    print("Aggregating...")
+            print("Accept: %d; Reject: %d" % (len(accept),len(reject)))
 
-                results = [queue.get() for j in jobs]
-
-                for res in results:
-                    for key,value in res.items():
-                        support_count[key] += value
-
-                
-
-            query_per_candi = self.args.num_participants * self.c_len[self.round] /len(candidates)
-            print("Candidate avg chance: %.2f" % query_per_candi)
-            self.thres[fragment_len] = self.__calculateThres(query_per_candi)
-
-            fragments = self.__filterCandidates(support_count)
-
-
-            print("eta: %.3f" % self.eta[fragment_len])
-            print("thres: %.2f" % self.thres[fragment_len])
-            print("%d-fragments: %d admitted" % (fragment_len+1,len(fragments)))
-
-        return fragments
-                
                 
 
 
