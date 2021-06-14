@@ -76,7 +76,7 @@ class FfpaHandler(Handler):
         while True:
             if self.server.terminal() is True:
                 print('Terminal')
-                return self.server.accept_pool.outputSuper()
+                return self.server.accept_pool.output()
             self.round += 1
             printRound(self.round)
             print("Candidate left: %d" % self.server.candidateNum())
