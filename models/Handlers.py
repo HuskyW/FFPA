@@ -27,6 +27,7 @@ class FfpaHandler(Handler):
         self.dataset = dataset
         self.orig_rec_num = self.dataset.get_line_num()
         self.clients_num = self.orig_rec_num * self.args.duplicate
+        self.args.num_clients = self.clients_num
         self.server = FfpaServer(self.args)
         self.randomizer = Randomizer(self.args)
         init_candidates = self.dataset.init_candidate()
@@ -42,7 +43,6 @@ class FfpaHandler(Handler):
 
 
     def __oneClient(self,client_idx,candidates):
- 
         candi_len = len(candidates)
         candi_save = list(candidates)
         response = [0] * candi_len

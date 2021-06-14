@@ -13,7 +13,7 @@ class CandidatePool():
         self.eta = args.eta
         self.xi = args.xi
         self.k = args.k
-        self.n = args.num_participants
+        self.n = args.num_clients
         self.kprop = self.k/self.n
 
     def newCandidate(self,candidate):
@@ -21,10 +21,11 @@ class CandidatePool():
 
     def drawCandidate(self,num):
         keys = list(self.pool.keys())
-        if num >= len(keys):
-            return keys
-        idxs = np.random.choice(len(keys),num,replace=False)
         res = []
+        while num > len(keys):
+            res += keys.copy()
+            num -= len(keys)
+        idxs = np.random.choice(len(keys),num,replace=False)
         for idx in idxs:
             res.append(keys[idx])
         return res
@@ -59,7 +60,6 @@ class CandidatePool():
         no = self.pool[candidate][0]
         prop = yes / (yes + no)
         support = yes + no
-
         upper_thres = self.kprop * (1 - self.eta) + (1-self.kprop) * self.eta + math.sqrt(-math.log(self.xi)/(2*support) )
         lower_thres = self.kprop * (1 - self.eta) + (1-self.kprop) * self.eta - math.sqrt(-math.log(self.xi)/(2*support) )
 
