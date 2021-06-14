@@ -3,7 +3,7 @@ from utils.Options import args_parser
 import pickle
 from models.GroundTruth import groundTruth
 from models.Handlers import FfpaHandler
-from utils.Naming import GroundTruthPickleName, SupportCountPickleName
+from utils.Naming import SupportCountPickleName
 from utils.Print import printLog
 import os
 
@@ -19,20 +19,15 @@ def ckeckWithGroundTruth(result,truth):
     return precision, recall
 
 def getGroundTruth(args):
-    pickleName = GroundTruthPickleName(args)
     scName = SupportCountPickleName(args)
-    if os.path.isfile(pickleName):
-        with open(pickleName,'rb') as fp:
-            ground_truth = pickle.load(fp)
-        return ground_truth
-    elif os.path.isfile(scName):
+    if os.path.isfile(scName):
         with open(scName,'rb') as fp:
             sc_rec = pickle.load(fp)
             if sc_rec['k'] > (args.k/args.duplicate):
                 print("Support count record invalid")
                 exit(0)
             data = sc_rec['data']
-            ground_truth = [i[0] for i in data if i[1] >= (args.k/args.duplicate)]
+            ground_truth = [i[0] for i in data.items() if i[1] >= (args.k/args.duplicate)]
             return ground_truth
     print("Ground truth not generated yet")
     exit(0)
@@ -41,6 +36,7 @@ def getGroundTruth(args):
 if __name__ == '__main__':
     args = args_parser()
     if args.dataset == 'msnbc':
+        args.pattern_type = 'sequence'
         if args.load_pickle is True:
             with open('data/msnbc.pickle','rb') as fp:
                 dataset = pickle.load(fp)
@@ -64,8 +60,16 @@ if __name__ == '__main__':
             fragments = groundTruthFromConfig(config,args)
             print(fragments)
         else:
-            fragments = groundTruth(dataset,args)
-            print(fragments)
+            res = groundTruth(dataset,args)
+            print('%d subsequence found' % len(res))
+            for key, value in res.items():
+                print('%s: %d'%(str(key),value))
+            support_count_record = {}
+            support_count_record['data'] = res
+            support_count_record['k'] = args.k
+            scName = SupportCountPickleName(args)
+            with open(scName,'wb') as fp:
+                pickle.dump(support_count_record,fp)
     else:  
         if args.mode == 'ffpa':
             handler = FfpaHandler(args,dataset)
@@ -73,3 +77,13 @@ if __name__ == '__main__':
         if args.verbose:
             print(fragments)
 
+    if args.dataset == 'zipf':
+        ground_truth = groundTruthFromConfig(config,args)
+    elif args.dataset == 'msnbc' or args.dataset == 'oldenburg':
+        ground_truth = getGroundTruth(args)
+    if len(fragments) > 0:
+        precision, recall = ckeckWithGroundTruth(fragments,ground_truth)
+    else:
+        print("No fragment published")
+        precision = -1.0
+        recall = 0.0

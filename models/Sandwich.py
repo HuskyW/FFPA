@@ -124,18 +124,24 @@ class AcceptPool():
         new_candidates = self.__findCandidate(target)
         return new_candidates
 
+    def __normalizePool(self,pool):
+        res = set()
+        for subpool in pool.values():
+            res.update(subpool)
+        return res
+    
     def output(self):
-        return self.pool
+        return self.__normalizePool(self.pool)
 
     def outputSuper(self):
-        return self.super_pool
+        return self.__normalizePool(self.super_pool)
 
 
 class FfpaServer():
     def __init__(self,args):
         self.args = args
         self.candidate_pool = CandidatePool(self.args)
-        if self.args.dataset == 'msnbc':
+        if self.args.pattern_type == 'sequence':
             utils = seqUtils()
         self.accept_pool = AcceptPool(utils)
     
