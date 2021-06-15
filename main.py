@@ -66,12 +66,13 @@ if __name__ == '__main__':
             scName = SupportCountPickleName(args)
             with open(scName,'wb') as fp:
                 pickle.dump(support_count_record,fp)
-    else:  
-        if args.mode == 'ffpa':
-            handler = FfpaHandler(args,dataset)
-        fragments = handler.run()
-        if args.verbose:
-            print(fragments)
+        exit(0)
+
+    if args.mode == 'ffpa':
+        handler = FfpaHandler(args,dataset)
+    fragments = handler.run()
+    if args.verbose:
+        print(fragments)
 
     if args.dataset == 'zipf':
         ground_truth = groundTruthFromConfig(config,args)
@@ -83,3 +84,7 @@ if __name__ == '__main__':
         print("No fragment published")
         precision = -1.0
         recall = 0.0
+
+    log = printLog(args,(precision,recall))
+    with open('./save/log','a') as fp:
+        fp.write(log)

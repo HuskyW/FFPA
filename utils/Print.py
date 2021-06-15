@@ -12,21 +12,15 @@ def printLog(args,performance):
     record += '%s;' % str(args.mode)
     record += 'precision=%.4f;' % performance[0]
     record += 'recall=%.4f;' % performance[1]
-    record += 'l=%d;' % args.l
-    record += 'k=%d;' % args.k
     record += 'dup=%d;' % args.duplicate
     record += 'm=%d;' % args.num_participants
 
-    if args.mode == 'fastpub':
+    if args.mode == 'ffpa':
+        record += 'k=%d;' % args.k
+        record += 'xi=%.2f;' % args.xi
         record += 'epsilon=%.1f;' % args.epsilon
-        record += 'c_max=%d;' % args.c_max
-        record += 'xi=%.2f' % args.xi
-    if args.mode == 'sfp':
-        record += 'epsilon=%.1f;' % args.epsilon
-        record += 'sfp_threshold=%d;' % args.sfp_threshold
-        record += 'k_cut=%.2f' % args.k_cut
-    if args.mode == 'triehh':
-        record += 'round=%d' % args.round_threshold
+        record += 'c=%d;' % args.num_candidate
+        record += 'max_support=%d;' % args.max_support
     
     record += '\n'
     return record
