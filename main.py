@@ -37,7 +37,7 @@ if __name__ == '__main__':
     args = args_parser()
     if args.dataset == 'msnbc':
         args.pattern_type = 'sequence'
-        dataset = loadMsnbc(dump=args.write_pickle,minLength=args.min_length,maxLength=args.max_length)
+        dataset = loadMsnbc(minLength=args.min_length,maxLength=args.max_length)
     elif args.dataset == 'zipf':
         with open('data/zipf.pickle','rb') as fp:
             dataset = pickle.load(fp)

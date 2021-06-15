@@ -10,11 +10,8 @@ from models.Apriori import seqUtils
 class CandidatePool():
     def __init__(self,args):
         self.pool = {}
-        self.eta = args.eta
-        self.xi = args.xi
-        self.k = args.k
-        self.n = args.num_clients
-        self.kprop = self.k/self.n
+        self.args = args
+        self.kprop = self.args.k/self.args.num_clients
 
     def newCandidate(self,candidate):
         self.pool[candidate] = [0,0]
@@ -38,7 +35,6 @@ class CandidatePool():
     def leaveCheck(self):
         accept = []
         reject = []
-
         removed = []
         for k in self.pool.keys():
             res = self.__supportCountBar(k)
@@ -60,8 +56,14 @@ class CandidatePool():
         no = self.pool[candidate][0]
         prop = yes / (yes + no)
         support = yes + no
-        upper_thres = self.kprop * (1 - self.eta) + (1-self.kprop) * self.eta + math.sqrt(-math.log(self.xi)/(2*support) )
-        lower_thres = self.kprop * (1 - self.eta) + (1-self.kprop) * self.eta - math.sqrt(-math.log(self.xi)/(2*support) )
+        upper_thres = self.kprop * (1 - self.args.eta) + (1-self.kprop) * self.args.eta + math.sqrt(-math.log(self.args.xi)/(2*support) )
+        lower_thres = self.kprop * (1 - self.args.eta) + (1-self.kprop) * self.args.eta - math.sqrt(-math.log(self.args.xi)/(2*support) )
+        middle_thres = self.kprop * (1 - self.args.eta) + (1-self.kprop) * self.args.eta
+
+        if self.args.max_support > 0 and support > self.args.max_support:
+            if prop > middle_thres:
+                return 2
+            return 1
 
         if prop > upper_thres:
             return 2
