@@ -49,7 +49,10 @@ if __name__ == '__main__':
     else:
         print("Bad argument: dataset")
 
-    #dataset = [[1,4,7,8,3,5]]
+    if args.k > 1:
+        args.k = int(args.k)
+    else:
+        args.k = int(args.k * args.duplicate * dataset.get_line_num())
 
     if args.mode == 'groundtruth':
         if args.dataset == 'zipf':

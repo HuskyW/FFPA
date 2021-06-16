@@ -3,7 +3,7 @@ import argparse
 def args_parser():
     parser = argparse.ArgumentParser()
     # Basic params
-    parser.add_argument('--k', type=int, default=50, help="param of k-anonymity")
+    parser.add_argument('--k', type=float, default=10000, help="param of k-anonymity, when smaller than 1, it will be the proportion")
     parser.add_argument('--xi', type=float, default=0.1, help="allowed error rate for k-anonymity")
     parser.add_argument('--epsilon', type=float, default=10.0, help="param of LDP")
     parser.add_argument('--num_participants', type=int, default=100000, help="number of participating clients")
