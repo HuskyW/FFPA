@@ -45,7 +45,6 @@ def KMP_algorithm(string, substring):
 
 
 class Trajectory():
-    # One trajectory record
     def __init__(self,data):
         self.data = np.array(data,dtype='int')
         self.data_length = len(data)
@@ -69,6 +68,51 @@ class Trajectory():
 
 
 class SeqDataSet():
+    def __init__(self,points):
+        self.points = points
+        self.record = []
+
+    def add_line(self,line):
+        self.record.append(line)
+    
+    def get_line(self,index):
+        return self.record[index]
+
+    def get_line_num(self):
+        return len(self.record)
+
+    def __getitem__(self,index):
+        return self.get_line(index)
+
+    def init_candidate(self):
+        candidates = []
+        for p in self.points:
+            candi = tuple([p])
+            candidates.append(candi)
+        return candidates
+
+class Itemset():
+    def __init__(self,data):
+        self.data = set(data)
+        self.data_length = len(data)
+
+    def checkSub(self,query):
+        for i in query:
+            if i not in self.data:
+                return False
+        return True
+
+    def length(self):
+        return self.data_length
+
+    def __eq__(self,other):
+        comp = (self.id() == other.id())
+        return comp
+
+    def id(self):
+        return tuple(list(self.data).sort())
+
+class ItemDataSet():
     def __init__(self,points):
         self.points = points
         self.record = []
