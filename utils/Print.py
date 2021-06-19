@@ -16,7 +16,10 @@ def printLog(args,performance):
     record += 'm=%d;' % args.num_participants
 
     if args.mode == 'ffpa':
-        record += 'k=%d;' % args.k
+        if args.orig_k > 1:
+            record += 'k=%d;' % args.k
+        else:
+            record += 'k=%.2f;' % args.orig_k
         record += 'xi=%.2f;' % args.xi
         record += 'epsilon=%.1f;' % args.epsilon
         record += 'c=%d;' % args.num_candidate

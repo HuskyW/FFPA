@@ -49,6 +49,7 @@ if __name__ == '__main__':
     else:
         print("Bad argument: dataset")
 
+    args.orig_k = args.k
     if args.k > 1:
         args.k = int(args.k)
     else:
