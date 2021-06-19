@@ -12,7 +12,7 @@ def args_parser():
     parser.add_argument('--max_support', type=int, default=-1, help="force candidates to leave the pool after its support exceeds the threshold")
     
     # Settings
-    parser.add_argument('--dataset', type=str, default='msnbc', help="msnbc || zipf || oldenburg")
+    parser.add_argument('--dataset', type=str, default='msnbc', help="msnbc || movielens")
     parser.add_argument('--duplicate', type=int, default=1, help="virtually duplicate the dataset")
     parser.add_argument('--min_length', type=int, default=3, help="minimal length of each trajectory")
     parser.add_argument('--max_length', type=int, default=None, help="maximal length of each trajectory")

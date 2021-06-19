@@ -5,7 +5,7 @@ import numpy as np
 from copy import deepcopy
 import random
 import math
-from models.Apriori import seqUtils
+from models.Apriori import *
 
 class CandidatePool():
     def __init__(self,args):
@@ -79,6 +79,7 @@ class AcceptPool():
         self.pool = {}
         self.utils = utils
         self.super_pool = {}
+        self.candidate_history = set()
 
     def __inPool(self,target):
         l = self.utils.length(target)
@@ -87,43 +88,52 @@ class AcceptPool():
                 return True
         return False
     
-    def __findCandidate(self,target):
-        l = self.utils.length(target)
+    def __findCandidate(self,l):
         target_pool = self.pool[l]
         new_candidates = set()
-        for tail in target_pool:
-            res1 = self.utils.linker(target,tail)
-            res2 = self.utils.linker(tail,target)
-            res = set()
-            for i in res1:
-                res.add(i)
-            for i in res2:
-                res.add(i)
-            for res_candidate in res:
-                subs = self.utils.sub(res_candidate)
-                valid = 1
-                for sub in subs:
-                    if self.__inPool(sub) is False:
-                        valid = 0
-                        break
-                if valid == 1:
-                    new_candidates.add(res_candidate)
+        for head in target_pool:
+            for tail in target_pool:
+                res1 = self.utils.linker(head,tail)
+                res2 = self.utils.linker(tail,head)
+                res = set()
+                for i in res1:
+                    if i not in self.candidate_history:
+                        res.add(i)
+                for i in res2:
+                    if i not in self.candidate_history:
+                        res.add(i)
+                for res_candidate in res:
+                    subs = self.utils.sub(res_candidate)
+                    valid = 1
+                    for sub in subs:
+                        if self.__inPool(sub) is False:
+                            valid = 0
+                            break
+                    if valid == 1:
+                        new_candidates.add(res_candidate)
         return new_candidates
 
-    def addAccept(self,target):
-        l = self.utils.length(target)
-        if l not in self.pool.keys():
-            self.pool[l] = set()
-            self.super_pool[l] = set()
-        self.pool[l].add(target)
-        self.super_pool[l].add(target)
+    def addAccept(self,accepts):
+        focus_len = set()
+        for ac in accepts:
+            l = self.utils.length(ac)
+            focus_len.add(l)
+            if l not in self.pool.keys():
+                self.pool[l] = set()
+                self.super_pool[l] = set()
+            self.pool[l].add(ac)
+            self.super_pool[l].add(ac)
         
-        subs = self.utils.sub(target)
-        for sub in subs:
-            l_sub = self.utils.length(sub)
-            self.super_pool[l_sub].discard(sub)
+            subs = self.utils.sub(ac)
+            for sub in subs:
+                l_sub = self.utils.length(sub)
+                self.super_pool[l_sub].discard(sub)
 
-        new_candidates = self.__findCandidate(target)
+        new_candidates = set()
+        for l in focus_len:
+            new_candidates.update(self.__findCandidate(l))
+        for candi in new_candidates:
+            self.candidate_history.add(candi)
         return new_candidates
 
     def __normalizePool(self,pool):
@@ -145,6 +155,8 @@ class FfpaServer():
         self.candidate_pool = CandidatePool(self.args)
         if self.args.pattern_type == 'sequence':
             utils = seqUtils()
+        elif self.args.pattern_type == 'itemset':
+            utils = itemUtils()
         self.accept_pool = AcceptPool(utils)
     
     def drawCandidate(self,num):
@@ -157,11 +169,8 @@ class FfpaServer():
         for candidate, support in update.items():
             self.candidate_pool.updateResponse(candidate,support)
         accept, reject = self.candidate_pool.leaveCheck()
-        new_candidates = set()
-        for ac in accept:
-            res = self.accept_pool.addAccept(ac)
-            new_candidates.update(res)
-
+        res = self.accept_pool.addAccept(accept)
+        new_candidates = set(res)
         for new_c in new_candidates:
             self.candidate_pool.newCandidate(new_c)
         return accept, reject

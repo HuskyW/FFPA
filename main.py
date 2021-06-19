@@ -38,13 +38,9 @@ if __name__ == '__main__':
     if args.dataset == 'msnbc':
         args.pattern_type = 'sequence'
         dataset = loadMsnbc(minLength=args.min_length,maxLength=args.max_length)
-    elif args.dataset == 'zipf':
-        with open('data/zipf.pickle','rb') as fp:
-            dataset = pickle.load(fp)
-        with open('data/zipf_config.pickle','rb') as fp:
-            config = pickle.load(fp)
-    elif args.dataset == 'oldenburg':
-        with open('data/oldenburg.pickle','rb') as fp:
+    elif args.dataset == 'movielens':
+        args.pattern_type = 'itemset'
+        with open('data/movielens.pickle','rb') as fp:
             dataset = pickle.load(fp)
     else:
         print("Bad argument: dataset")
@@ -78,9 +74,7 @@ if __name__ == '__main__':
     if args.verbose:
         print(fragments)
 
-    if args.dataset == 'zipf':
-        ground_truth = groundTruthFromConfig(config,args)
-    elif args.dataset == 'msnbc' or args.dataset == 'oldenburg':
+    if args.dataset == 'msnbc' or args.dataset == 'movielens':
         ground_truth = getGroundTruth(args)
     if len(fragments) > 0:
         precision, recall = ckeckWithGroundTruth(fragments,ground_truth)

@@ -9,7 +9,7 @@ import pickle
 import multiprocess
 import math
 from utils.Print import printRound
-from models.Apriori import seqUtils
+from models.Apriori import *
 
 
 def generateCandidates(fragment,util):
@@ -17,7 +17,17 @@ def generateCandidates(fragment,util):
     for a in fragment:
         for b in fragment:
             link = util.linker(a,b)
-            res += link
+            allowed = []
+            for li in link:
+                flag = True
+                subs = util.sub(li)
+                for s in subs:
+                    if s not in fragment:
+                        flag = False
+                        break
+                if flag is True:
+                    allowed.append(li)
+            res += allowed
     return res
 
 
@@ -41,6 +51,8 @@ def ground_truth_worker(dataset,process_idx,candidates,participents,queue,verbos
 def groundTruth(dataset,args):
     if args.pattern_type == 'sequence':
         util = seqUtils()
+    elif args.pattern_type == 'itemset':
+        util = itemUtils()
     k = int(args.k/args.duplicate)
     traj_num = dataset.get_line_num()
     frag_len = 0
