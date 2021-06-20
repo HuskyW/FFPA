@@ -7,7 +7,7 @@ def args_parser():
     parser.add_argument('--xi', type=float, default=0.1, help="allowed error rate for k-anonymity")
     parser.add_argument('--epsilon', type=float, default=10.0, help="param of LDP")
     parser.add_argument('--num_participants', type=int, default=100000, help="number of participating clients")
-    parser.add_argument('--mode', type=str, default='ffpa', help="mode: groundtruth || ffpa")
+    parser.add_argument('--mode', type=str, default='ffpa', help="mode: groundtruth || ffpa || rappor")
     parser.add_argument('--num_candidate', type=int, default=10, help="maximum candidates assigned to one client")
     parser.add_argument('--max_support', type=int, default=-1, help="force candidates to leave the pool after its support exceeds the threshold")
     

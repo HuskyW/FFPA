@@ -3,6 +3,7 @@ from utils.Options import args_parser
 import pickle
 from models.GroundTruth import groundTruth
 from models.Handlers import FfpaHandler
+from models.Rappor import RapporHandler
 from utils.Naming import SupportCountPickleName
 from utils.Print import printLog
 import os
@@ -70,6 +71,8 @@ if __name__ == '__main__':
 
     if args.mode == 'ffpa':
         handler = FfpaHandler(args,dataset)
+    elif args.mode == 'rappor':
+        handler = RapporHandler(args,dataset)
     fragments = handler.run()
     if args.verbose:
         print(fragments)
