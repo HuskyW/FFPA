@@ -38,7 +38,8 @@ if __name__ == '__main__':
     args = args_parser()
     if args.dataset == 'msnbc':
         args.pattern_type = 'sequence'
-        dataset = loadMsnbc(minLength=args.min_length,maxLength=args.max_length)
+        with open('data/msnbc.pickle','rb') as fp:
+            dataset = pickle.load(fp)
     elif args.dataset == 'movielens':
         args.pattern_type = 'itemset'
         with open('data/movielens.pickle','rb') as fp:

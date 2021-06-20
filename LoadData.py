@@ -2,7 +2,7 @@ from models.DataSet import Trajectory, SeqDataSet
 import pickle
 
 
-def loadMsnbc(minLength=None,maxLength=None):
+def loadMsnbc(minLength=3,maxLength=None):
     msnbc_path = 'data/msnbc/msnbc990928.seq'
     with open(msnbc_path) as fp:
         lines = fp.readlines()
@@ -25,3 +25,9 @@ def loadMsnbc(minLength=None,maxLength=None):
         dataset.add_line(traj)
     
     return dataset
+
+
+if __name__ == '__main__':
+    ds = loadMsnbc()
+    with open("./data/msnbc.pickle",'wb') as fp:
+        pickle.dump(ds,fp)
