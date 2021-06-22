@@ -18,5 +18,8 @@ def args_parser():
     parser.add_argument('--process', type=int, default=0, help="number of worker processes, 0: single process")
 
 
+    # SFP settings
+    parser.add_argument('--sfp_threshold', type=int, default=80, help="number of fragment puzzle held")
+
     args = parser.parse_args()
     return args
