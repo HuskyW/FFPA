@@ -16,6 +16,7 @@ def args_parser():
     parser.add_argument('--duplicate', type=int, default=1, help="virtually duplicate the dataset")
     parser.add_argument('--verbose', action='store_true', help='verbose print')
     parser.add_argument('--process', type=int, default=0, help="number of worker processes, 0: single process")
+    parser.add_argument('--log_detail', action='store_true', help='log candidate details')
 
 
     # SFP settings

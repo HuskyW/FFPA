@@ -2,5 +2,13 @@
 
 def SupportCountPickleName(args):
     k = int(args.k/args.duplicate)
-    name = "save/supportcount_" + str(args.dataset) + '.pickle'
+    name = "groundtruth/supportcount_" + str(args.dataset) + '.pickle'
+    return name
+
+def CandidateDriftName(args):
+    name = "save/candidatedrift"
+    return name
+
+def LeaveNumPickleName(args):
+    name = "save/leavelog.pickle"
     return name

@@ -27,3 +27,11 @@ def printLog(args,performance):
     
     record += '\n'
     return record
+
+def printLines(orig_list):
+    res = ''
+    for i in range(len(orig_list)):
+        res += str(orig_list[i])
+        if i < len(orig_list) - 1:
+            res += '\n'
+    return res

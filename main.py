@@ -1,13 +1,15 @@
-from LoadData import loadMsnbc
-from utils.Options import args_parser
+import os
 import pickle
+from sys import exit
+
+
+from utils.Options import args_parser
 from models.GroundTruth import groundTruth
 from models.Handlers import FfpaHandler
 from models.Rappor import RapporHandler
 from models.Sfp import SfpHandler
 from utils.Naming import SupportCountPickleName
 from utils.Print import printLog
-import os
 
 
 def ckeckWithGroundTruth(result,truth):

@@ -5,13 +5,26 @@ import abc
 import math
 import numpy as np
 import multiprocess
+import pickle
 from collections import defaultdict
 
 
 from utils.Sampling import sampleClients
-from utils.Print import printRound
+from utils.Print import printRound, printLines
 from models.Sandwich import FfpaServer
 from models.Randomize import Randomizer
+from utils.Naming import *
+
+def logCandidateNum(args,candidate_log):
+    path = CandidateDriftName(args)
+    record = printLines(candidate_log)
+    with open(path,'w') as fp:
+        fp.write(record)
+
+def logSupportNum(args,support_log):
+    path = LeaveNumPickleName(args)
+    with open(path,'wb') as fp:
+        pickle.dump(support_log,fp)
 
 
 class Handler(metaclass=abc.ABCMeta):
@@ -73,13 +86,20 @@ class FfpaHandler(Handler):
 
 
     def run(self):
+        candidate_num_log = []
         while True:
             if self.server.terminal() is True:
                 print('Terminal')
+
+                if self.args.log_detail is True:
+                    logCandidateNum(self.args,candidate_num_log)
+                    logSupportNum(self.args,self.server.getLeaveLog())
+
                 return self.server.accept_pool.output()
             self.round += 1
             printRound(self.round)
             print("Candidate left: %d" % self.server.candidateNum())
+            candidate_num_log.append(self.server.candidateNum())
             participents = sampleClients(self.args,self.orig_rec_num)
 
             support_count = defaultdict(lambda : 0)

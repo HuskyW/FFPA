@@ -12,6 +12,7 @@ class CandidatePool():
         self.pool = {}
         self.args = args
         self.kprop = self.args.k/self.args.num_clients
+        self.leave_log = {} # how many support got when leaving the pool
 
     def newCandidate(self,candidate):
         self.pool[candidate] = [0,0]
@@ -46,6 +47,7 @@ class CandidatePool():
                 removed.append(k)
         
         for k in removed:
+            self.leave_log[k] = self.pool[k][0] + self.pool[k][1]
             del self.pool[k]
 
         return accept, reject
@@ -73,6 +75,9 @@ class CandidatePool():
 
     def candidate_num(self):
         return len(self.pool.keys())
+
+    def get_leave_log(self):
+        return self.leave_log
 
 class AcceptPool():
     def __init__(self,utils):
@@ -185,4 +190,7 @@ class FfpaServer():
 
     def output(self):
         return self.accept_pool.output()
+
+    def getLeaveLog(self):
+        return self.candidate_pool.get_leave_log()
     
