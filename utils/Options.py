@@ -8,7 +8,7 @@ def args_parser():
     parser.add_argument('--epsilon', type=float, default=10.0, help="param of LDP")
     parser.add_argument('--num_participants', type=int, default=100000, help="number of participating clients")
     parser.add_argument('--mode', type=str, default='ffpa', help="mode: groundtruth || ffpa || rappor")
-    parser.add_argument('--num_candidate', type=int, default=10, help="candidates sent to each client")
+    parser.add_argument('--num_candidate', type=int, default=1, help="candidates sent to each client")
     parser.add_argument('--max_support', type=int, default=-1, help="force candidates to leave the pool after its support exceeds the threshold")
     
     # Settings

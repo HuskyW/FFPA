@@ -12,6 +12,8 @@ def printLog(args,performance):
     record += '%s;' % str(args.mode)
     record += 'precision=%.4f;' % performance[0]
     record += 'recall=%.4f;' % performance[1]
+    if args.mode == 'ffpa':
+        record += 'round=%i;' % args.round
     record += 'dup=%d;' % args.duplicate
     record += 'm=%d;' % args.num_participants
     record += 'epsilon=%.1f;' % args.epsilon
@@ -21,7 +23,7 @@ def printLog(args,performance):
             record += 'k=%d;' % args.k
         else:
             record += 'k=%.2f;' % args.orig_k
-        record += 'xi=%.2f;' % args.xi
+        record += 'xi=%f;' % args.xi
         record += 'c=%d;' % args.num_candidate
         record += 'max_support=%d;' % args.max_support
     

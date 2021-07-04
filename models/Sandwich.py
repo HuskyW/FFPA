@@ -56,8 +56,10 @@ class CandidatePool():
         # 0: retain; 1: reject; 2: accept
         yes = self.pool[candidate][1]
         no = self.pool[candidate][0]
-        prop = yes / (yes + no)
         support = yes + no
+        if support == 0:
+            return 0
+        prop = yes / support
         upper_thres = self.kprop * (1 - self.args.eta) + (1-self.kprop) * self.args.eta + math.sqrt(-math.log(self.args.xi)/(2*support) )
         lower_thres = self.kprop * (1 - self.args.eta) + (1-self.kprop) * self.args.eta - math.sqrt(-math.log(self.args.xi)/(2*support) )
         middle_thres = self.kprop * (1 - self.args.eta) + (1-self.kprop) * self.args.eta

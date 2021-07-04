@@ -94,7 +94,7 @@ class FfpaHandler(Handler):
                 if self.args.log_detail is True:
                     logCandidateNum(self.args,candidate_num_log)
                     logSupportNum(self.args,self.server.getLeaveLog())
-
+                self.args.round = self.round
                 return self.server.accept_pool.output()
             self.round += 1
             printRound(self.round)
