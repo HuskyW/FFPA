@@ -71,6 +71,11 @@ class RapporHandler(Handler):
                 res.add(tuple(subset))
         return res
 
+    def __supportthres(self):
+        targetFreq = self.args.k / self.clients_num
+        noisyFreq = (1-self.args.eta) * targetFreq + self.args.eta * (1-targetFreq)
+        return self.args.num_participants * noisyFreq
+
 
 
     def run(self):
@@ -100,7 +105,7 @@ class RapporHandler(Handler):
             support_count += res
 
         fragments = set()
-        support_thres = self.args.k * len(participents) / (self.clients_num)
+        support_thres = self.__supportthres()
         for i in range(self.one_hot_size):
             if support_count[i] >= support_thres:
                 good_frag = self.__idx2data(i)

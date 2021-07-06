@@ -18,11 +18,13 @@ def printLog(args,performance):
     record += 'm=%d;' % args.num_participants
     record += 'epsilon=%.1f;' % args.epsilon
 
+    if args.orig_k > 1:
+        record += 'k=%d;' % args.k
+    else:
+        record += 'k=%.2f;' % args.orig_k
+
+
     if args.mode == 'ffpa':
-        if args.orig_k > 1:
-            record += 'k=%d;' % args.k
-        else:
-            record += 'k=%.2f;' % args.orig_k
         record += 'xi=%f;' % args.xi
         record += 'c=%d;' % args.num_candidate
         record += 'max_support=%d;' % args.max_support
