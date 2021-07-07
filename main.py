@@ -1,6 +1,7 @@
 import os
 import pickle
 from sys import exit
+import time
  
 
 from utils.Options import args_parser
@@ -38,6 +39,9 @@ def getGroundTruth(args):
 
 
 if __name__ == '__main__':
+
+    start_time = time.time()
+
     args = args_parser()
     if args.dataset == 'msnbc':
         args.pattern_type = 'sequence'
@@ -95,3 +99,6 @@ if __name__ == '__main__':
     log = printLog(args,(precision,recall))
     with open('./save/log','a') as fp:
         fp.write(log)
+
+    end_time = time.time()
+    print("Time: %d sec" % int(end_time-start_time))
