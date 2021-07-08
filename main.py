@@ -51,6 +51,26 @@ if __name__ == '__main__':
         args.pattern_type = 'itemset'
         with open('data/movielens.pickle','rb') as fp:
             dataset = pickle.load(fp)
+    elif args.dataset == 'ml12':
+        args.pattern_type = 'itemset'
+        with open('data/ml12.pickle','rb') as fp:
+            dataset = pickle.load(fp)
+    elif args.dataset == 'ml14':
+        args.pattern_type = 'itemset'
+        with open('data/ml14.pickle','rb') as fp:
+            dataset = pickle.load(fp)
+    elif args.dataset == 'ml16':
+        args.pattern_type = 'itemset'
+        with open('data/ml16.pickle','rb') as fp:
+            dataset = pickle.load(fp)
+    elif args.dataset == 'ml18':
+        args.pattern_type = 'itemset'
+        with open('data/ml18.pickle','rb') as fp:
+            dataset = pickle.load(fp)
+    elif args.dataset == 'ml20':
+        args.pattern_type = 'itemset'
+        with open('data/ml20.pickle','rb') as fp:
+            dataset = pickle.load(fp)
     else:
         print("Bad argument: dataset")
 
@@ -87,8 +107,7 @@ if __name__ == '__main__':
     if args.verbose:
         print(fragments)
 
-    if args.dataset == 'msnbc' or args.dataset == 'movielens':
-        ground_truth = getGroundTruth(args)
+    ground_truth = getGroundTruth(args)
     if len(fragments) > 0:
         precision, recall = ckeckWithGroundTruth(fragments,ground_truth)
     else:
