@@ -21,6 +21,7 @@ def ckeckWithGroundTruth(result,truth):
     precision = tp/len(result)
     recall = tp/len(truth)
     print("Precision: %.2f; Recall: %.2f" % (precision,recall))
+    print("TP: %d; FP: %d; FN: %d" % (tp,len(result)-tp,len(truth)-tp))
     return precision, recall
 
 def getGroundTruth(args):
@@ -47,6 +48,15 @@ if __name__ == '__main__':
         args.pattern_type = 'sequence'
         with open('data/msnbc.pickle','rb') as fp:
             dataset = pickle.load(fp)
+    elif args.dataset == 'msnbc10':
+        args.pattern_type = 'sequence'
+        with open('data/msnbc10.pickle','rb') as fp:
+            dataset = pickle.load(fp)
+    elif args.dataset == 'msnbc14':
+        args.pattern_type = 'sequence'
+        with open('data/msnbc14.pickle','rb') as fp:
+            dataset = pickle.load(fp)
+
     elif args.dataset == 'movielens':
         args.pattern_type = 'itemset'
         with open('data/movielens.pickle','rb') as fp:

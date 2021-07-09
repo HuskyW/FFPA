@@ -62,21 +62,26 @@ class RapporHandler(Handler):
         queue.put(support)
         return
 
-    def __allsubs(self,target):
+
+    def __supportthres(self):
+        return self.args.num_participants * self.args.k / self.clients_num
+
+    def __estimateSupport(self,support):
+        noisyFreq = support / self.args.num_participants
+        estimatedFreq = (noisyFreq - self.args.eta) / (1 - 2 * self.args.eta)
+        return estimatedFreq * self.args.num_participants
+
+    def __expensionsets(self,i):
+        target = self.__idx2data(i)
         l_target = len(target)
         res = set()
         for l in range(1,l_target+1):
             for subset in itertools.combinations(list(target),l):
                 subset = list(subset)
                 subset.sort()
-                res.add(tuple(subset))
+                subid = self.__data2idx(tuple(subset))
+                res.add(subid)
         return res
-
-    def __supportthres(self):
-        targetFreq = self.args.k / self.clients_num
-        noisyFreq = (1-self.args.eta) * targetFreq + self.args.eta * (1-targetFreq)
-        return self.args.num_participants * noisyFreq
-
 
 
     def run(self):
@@ -105,13 +110,25 @@ class RapporHandler(Handler):
         for res in results:
             support_count += res
 
+        
+        print("Aggregating...")
+        estimated_support_count = [0] * self.one_hot_size
+        for i in range(self.one_hot_size):
+            estimated_support_count[i] = self.__estimateSupport(support_count[i])
+
+            
+        regular_support_count = [0] * self.one_hot_size
+        for i in range(self.one_hot_size):
+            subs = self.__expensionsets(i)
+            for j in subs:
+                regular_support_count[j] += estimated_support_count[i]
+
         fragments = set()
         support_thres = self.__supportthres()
         for i in range(self.one_hot_size):
-            if support_count[i] >= support_thres:
+            if regular_support_count[i] >= support_thres:
                 good_frag = self.__idx2data(i)
-                allsub = self.__allsubs(good_frag)
-                fragments.update(allsub)
+                fragments.add(good_frag)
 
         print("Client time: %d sec" % int(end_time-start_time))
 
