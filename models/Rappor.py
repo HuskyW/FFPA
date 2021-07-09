@@ -2,6 +2,7 @@ import math
 import multiprocess
 import numpy as np
 import itertools
+import time
 
 from utils.Sampling import sampleClients
 from models.Handlers import Handler
@@ -84,7 +85,7 @@ class RapporHandler(Handler):
         queue = mananger.Queue()
         jobs = []
         workload = math.floor(len(participents)/self.args.process)
-
+        start_time = time.time()
         for proc_idx in range(self.args.process):
             if proc_idx == self.args.process - 1:
                 participents_load = participents[proc_idx*workload:len(participents)]
@@ -96,7 +97,7 @@ class RapporHandler(Handler):
 
         for p in jobs:
             p.join()
-
+        end_time = time.time()
 
         results = [queue.get() for j in jobs]
 
@@ -111,5 +112,7 @@ class RapporHandler(Handler):
                 good_frag = self.__idx2data(i)
                 allsub = self.__allsubs(good_frag)
                 fragments.update(allsub)
+
+        print("Client time: %d sec" % int(end_time-start_time))
 
         return fragments

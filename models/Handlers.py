@@ -14,6 +14,7 @@ from utils.Print import printRound, printLines
 from models.Sandwich import FfpaServer
 from models.Randomize import Randomizer
 from utils.Naming import *
+import time
 
 def logCandidateNum(args,candidate_log):
     path = CandidateDriftName(args)
@@ -87,10 +88,11 @@ class FfpaHandler(Handler):
 
     def run(self):
         candidate_num_log = []
+        client_time = 0
         while True:
             if self.server.terminal() is True:
                 print('Terminal')
-
+                print("Client time: %d sec" % int(client_time))
                 if self.args.log_detail is True:
                     logCandidateNum(self.args,candidate_num_log)
                     logSupportNum(self.args,self.server.getLeaveLog())
@@ -109,6 +111,8 @@ class FfpaHandler(Handler):
             jobs = []
             workload = math.floor(len(participents)/self.args.process)
 
+            start_time = time.time()
+
             for proc_idx in range(self.args.process):
                 if proc_idx == self.args.process - 1:
                     participents_load = participents[proc_idx*workload:len(participents)]
@@ -121,6 +125,8 @@ class FfpaHandler(Handler):
             for p in jobs:
                 p.join()
 
+            end_time = time.time()
+            client_time += (end_time - start_time)
 
             results = [queue.get() for j in jobs]
 
