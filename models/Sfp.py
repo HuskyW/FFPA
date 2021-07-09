@@ -8,6 +8,7 @@ import multiprocess
 import numpy as np
 import math
 import random
+import time
 
 from models.Handlers import Handler
 from utils.Sampling import sampleClients
@@ -272,6 +273,9 @@ class SfpHandler(Handler):
         jobs = []
         workload = math.floor(len(participents)/self.args.process)
         print("Receiving client info...")
+
+        start_time = time.time()
+
         for proc_idx in range(self.args.process):
             if proc_idx == self.args.process - 1:
                 participents_load = participents[proc_idx*workload:len(participents)]
@@ -285,6 +289,7 @@ class SfpHandler(Handler):
         for p in jobs:
             p.join()
 
+        end_time = time.time()
 
         print("Aggregating cms...")
 
@@ -377,6 +382,8 @@ class SfpHandler(Handler):
         for f in desired:
             fragments.update(self.__subfragment(f))
         print('Target fragment found: %d' % len(fragments))
+
+        print("Client time: %d sec" % int(end_time-start_time))
 
         return fragments
 
