@@ -12,7 +12,7 @@ def args_parser():
     parser.add_argument('--max_support', type=int, default=-1, help="force candidates to leave the pool after its support exceeds the threshold")
     
     # Settings
-    parser.add_argument('--dataset', type=str, default='msnbc', help="msnbc || movielens || ml12 || ml14 || ml16 || ml18 || ml20 || msnbc10 || msnbc14")
+    parser.add_argument('--dataset', type=str, default='msnbc', help="msnbc || movielens || kosarak || ml12 || ml14 || ml16 || ml18 || ml20 || msnbc10 || msnbc14")
     parser.add_argument('--duplicate', type=int, default=1, help="virtually duplicate the dataset")
     parser.add_argument('--verbose', action='store_true', help='verbose print')
     parser.add_argument('--process', type=int, default=0, help="number of worker processes, 0: single process")

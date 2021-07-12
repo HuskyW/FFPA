@@ -87,4 +87,15 @@ class itemUtils():
     def length(self,target):
         return len(target)
 
-        
+class hitterUtils():
+    def __init__(self):
+        return
+
+    def linker(self,a,b):
+        return []
+
+    def sub(self,target):
+        return []
+
+    def length(self,target):
+        return 1

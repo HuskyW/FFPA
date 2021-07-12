@@ -53,6 +53,8 @@ def groundTruth(dataset,args):
         util = seqUtils()
     elif args.pattern_type == 'itemset':
         util = itemUtils()
+    elif args.pattern_type == 'item':
+        util = hitterUtils()
     k = int(args.k/args.duplicate)
     traj_num = dataset.get_line_num()
     frag_len = 0

@@ -7,7 +7,7 @@ import time
 from utils.Options import args_parser
 from models.GroundTruth import groundTruth
 from models.Handlers import FfpaHandler
-from models.Rappor import RapporHandler
+from models.Rappor import RapporHandler, HitterRapporHandler
 from models.Sfp import SfpHandler
 from utils.Naming import SupportCountPickleName
 from utils.Print import printLog
@@ -81,6 +81,10 @@ if __name__ == '__main__':
         args.pattern_type = 'itemset'
         with open('data/ml20.pickle','rb') as fp:
             dataset = pickle.load(fp)
+    elif args.dataset == 'kosarak':
+        args.pattern_type = 'item'
+        with open('data/kosarak.pickle','rb') as fp:
+            dataset = pickle.load(fp)
     else:
         print("Bad argument: dataset")
 
@@ -110,7 +114,10 @@ if __name__ == '__main__':
     if args.mode == 'ffpa':
         handler = FfpaHandler(args,dataset)
     elif args.mode == 'rappor':
-        handler = RapporHandler(args,dataset)
+        if args.pattern_type == 'itemset':
+            handler = RapporHandler(args,dataset)
+        elif args.pattern_type == 'item':
+            handler = HitterRapporHandler(args,dataset)
     elif args.mode == 'sfp':
         handler = SfpHandler(args,dataset)
     fragments = handler.run()

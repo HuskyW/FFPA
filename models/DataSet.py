@@ -135,3 +135,43 @@ class ItemDataSet():
             candi = tuple([p])
             candidates.append(candi)
         return candidates
+
+class Hitterset():
+    def __init__(self,data):
+        self.data = set(data)
+        self.data_length = len(data)
+
+    def checkSub(self,query):
+        if query in self.data:
+            return True
+        return False
+
+    def length(self):
+        return 1
+
+    def __eq__(self,other):
+        comp = (self.id() == other.id())
+        return comp
+
+    def id(self):
+        return tuple(list(self.data).sort())
+
+class HitterDataSet():
+    def __init__(self,points):
+        self.points = points
+        self.record = []
+
+    def add_line(self,line):
+        self.record.append(line)
+    
+    def get_line(self,index):
+        return self.record[index]
+
+    def get_line_num(self):
+        return len(self.record)
+
+    def __getitem__(self,index):
+        return self.get_line(index)
+
+    def init_candidate(self):
+        return self.points

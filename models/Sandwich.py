@@ -164,6 +164,8 @@ class FfpaServer():
             utils = seqUtils()
         elif self.args.pattern_type == 'itemset':
             utils = itemUtils()
+        elif self.args.pattern_type == 'item':
+            utils = hitterUtils()
         self.accept_pool = AcceptPool(utils)
     
     def drawCandidate(self,num):
