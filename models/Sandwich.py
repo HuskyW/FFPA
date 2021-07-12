@@ -42,12 +42,13 @@ class CandidatePool():
             if res == 2:
                 accept.append(k)
                 removed.append(k)
+                self.leave_log[k] = (self.pool[k][0] + self.pool[k][1],'accept')
             if res == 1:
                 reject.append(k)
                 removed.append(k)
+                self.leave_log[k] = (self.pool[k][0] + self.pool[k][1],'reject')
         
         for k in removed:
-            self.leave_log[k] = self.pool[k][0] + self.pool[k][1]
             del self.pool[k]
 
         return accept, reject
