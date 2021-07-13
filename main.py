@@ -81,9 +81,18 @@ if __name__ == '__main__':
         args.pattern_type = 'itemset'
         with open('data/ml20.pickle','rb') as fp:
             dataset = pickle.load(fp)
+
     elif args.dataset == 'kosarak':
         args.pattern_type = 'item'
         with open('data/kosarak.pickle','rb') as fp:
+            dataset = pickle.load(fp)
+    elif args.dataset == 'k300':
+        args.pattern_type = 'item'
+        with open('data/k300.pickle','rb') as fp:
+            dataset = pickle.load(fp)
+    elif args.dataset == 'k400':
+        args.pattern_type = 'item'
+        with open('data/k400.pickle','rb') as fp:
             dataset = pickle.load(fp)
     else:
         print("Bad argument: dataset")
