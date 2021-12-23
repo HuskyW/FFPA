@@ -3,10 +3,10 @@
 Note that FedFPM is named FFPA in this implementation.
 
 ## Introduction
-FedFPM is a utilied federated analytics framework for frequent pattern mining on distributed data. It satisfies local differenatial privacy as a strong local privacy preservation scheme. It gains high data utility (F1 score) of obtained data over benchmarks with lower client usage. This implementation allow FedFPM to work on frequent item mining (FIM), frequent itemset mining (FIsM), and frequent sequence mining (FSM), where FedFPM still has potential to work on other scenarios. 
+FedFPM is a unified federated analytics framework for frequent pattern mining on distributed data. It satisfies local differential privacy as a strong local privacy preservation scheme. It gains high data utility (F1 score) of obtained data over benchmarks with lower client usage. This implementation allows FedFPM to work on frequent item mining (FIM), frequent itemset mining (FIsM), and frequent sequence mining (FSM), where FedFPM still has the potential to work on other scenarios. 
 
 ## Features
-- functionality of FedFPM on simulated environment
+- functionality of FedFPM on a simulated environment
 - three datasets: Kosarak for FIM, MovieLens for FIsM, and MovieLens for FSM
 - two benchmarks: basic RAPPOR (with one-hot encoding) for FIM and FIsM, and SFP for FSM
 - find the groundtruth frequent patterns with the Apriori algorithm
@@ -27,7 +27,7 @@ The groundtruth of frequent patterns is required to calculate the F1 score. We p
 
 To prepare the datasets, you can write datastructures like those in "./models/DataSet.py". Note that you should implement two structures: one is the local data in one client (like **class Trajectory**). The other is the global dataset of all clients (like **class SeqDataSet**). All the methods present in "./models/DataSet.py" should be implemented. After that, you need to pickle the latter structure and read them in "./main.py"
 
-To prepare the groundtruths, you can run the codes with --mode==groundtruth, and the ground truth patterns will be autometically saved. Note that the save includes all patterns exceed the frequency threshold (--k) along with their corresponding frequency. The save can work for all future runs with higher frequency, e.g., if you have run the code with "--mode==groundtruth --dataset=msnbc --k=0.01", you can simply run "--mode==ffpa --dataset=msnbc --k=0.02" and calculate the F1 score properly.
+To prepare the groundtruths, you can run the codes with --mode==groundtruth, and the ground truth patterns will be automatically saved. Note that the save includes all patterns that exceed the frequency threshold (--k) along with their corresponding frequency. The save can work for all future runs with higher frequency, e.g., if you have run the code with "--mode==groundtruth --dataset=msnbc --k=0.01", you can simply run "--mode==ffpa --dataset=msnbc --k=0.02" and calculate the F1 score properly.
 
 ## Run the code
 
