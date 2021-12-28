@@ -21,13 +21,15 @@ multiprocess==0.70.11.1
 
 ## Preparation of datasets and groundtruths
 
-The groundtruth of frequent patterns is required to calculate the F1 score. We place the datasets and groundtruth of frequent patterns in .... You can download the folders "./data" and "./groundtruth" and place them in the project root directory.
+We provide the datasets and groundtruth of frequent patterns in https://drive.google.com/file/d/1AnFFPENc2SpHKwmofhkpHhpxwFyZ_7Xs/view?usp=sharing
+
+You can download the folders "./data" and "./groundtruth" and place them in the project root directory.
 
 ### You can also prepare those by yourself
 
 To prepare the datasets, you can write datastructures like those in "./models/DataSet.py". Note that you should implement two structures: one is the local data in one client (like **class Trajectory**). The other is the global dataset of all clients (like **class SeqDataSet**). All the methods present in "./models/DataSet.py" should be implemented. After that, you need to pickle the latter structure and read them in "./main.py"
 
-To prepare the groundtruths, you can run the codes with --mode==groundtruth, and the ground truth patterns will be automatically saved. Note that the save includes all patterns that exceed the frequency threshold (--k) along with their corresponding frequency. The save can work for all future runs with higher frequency, e.g., if you have run the code with "--mode==groundtruth --dataset=msnbc --k=0.01", you can simply run "--mode==ffpa --dataset=msnbc --k=0.02" and calculate the F1 score properly.
+The groundtruth of frequent patterns is required to calculate the F1 score. To prepare the groundtruths, you can run the codes with --mode==groundtruth, and the ground truth patterns will be automatically saved. Note that the save includes all patterns that exceed the frequency threshold (--k) along with their corresponding frequency. The save can work for all future runs with higher frequency, e.g., if you have run the code with "--mode==groundtruth --dataset=msnbc --k=0.01", you can simply run "--mode==ffpa --dataset=msnbc --k=0.02" and calculate the F1 score properly.
 
 ## Run the code
 
